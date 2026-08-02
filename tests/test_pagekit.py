@@ -218,6 +218,44 @@ def test_dot_spacing_override_per_module():
 
 
 # --------------------------------------------------------------------------
+def test_ink_recolours_every_role():
+    """One `ink` value stands behind stroke, text, dots and rules."""
+    from pagekit.theme import Theme
+
+    roles = ["stroke", "label.colour", "heading.colour", "dots.colour", "lines.colour"]
+
+    default = Theme()
+    assert all(default.get(r) == "#231F20" for r in roles), "defaults unchanged"
+
+    black = Theme({"ink": "#000"})
+    assert all(black.get(r) == "#000" for r in roles)
+
+    # An individual role can still be pinned without disturbing the others.
+    mixed = Theme({"ink": "#000", "dots": {"colour": "#999"}})
+    assert mixed.get("dots.colour") == "#999"
+    assert mixed.get("stroke") == "#000"
+    assert mixed.get("label.colour") == "#000"
+
+
+def test_theme_indirection_is_general_and_guards_cycles():
+    from pagekit.theme import Theme
+
+    theme = Theme({"accent": "#c00", "heading": {"colour": "$theme.accent"}})
+    assert theme.get("heading.colour") == "#c00"
+
+    # A chain resolves all the way down.
+    chained = Theme({"a": "#123", "b": "$theme.a", "stroke": "$theme.b"})
+    assert chained.get("stroke") == "#123"
+
+    looped = Theme({"stroke": "$theme.ink", "ink": "$theme.stroke"})
+    try:
+        looped.get("stroke")
+    except ValueError as exc:
+        assert "circular" in str(exc)
+    else:
+        raise AssertionError("a circular reference must raise, not hang")
+
+
 def test_margins_mirror():
     margins = spec.Margins.parse({"top": 2.5, "bottom": 7.5, "inner": 25, "outer": 5})
     assert margins.for_side("right") == (2.5, 5.0, 7.5, 25.0)
@@ -271,9 +309,26 @@ def test_daily_matches_the_original_artwork():
 
 
 def test_back_page_is_mirrored():
+    """The verso must be the recto's mirror image, whatever it contains.
+
+    Asserted as a property of the geometry rather than against specific boxes,
+    so redesigning either page's content cannot break it.
+    """
     document = spec.load(ROOT / "templates" / "daily.yaml")
-    svg = Renderer(document).render_all()[1][1]
-    assert (5.0, 2.5, 75.0, 160.0) in _rects(svg)
+    pages = Renderer(document).render_all()
+    front, back = pages[0][1], pages[1][1]
+
+    # Content block: gutter on the left of a recto, on the right of a verso.
+    front_rects = [r for r in _rects(front) if close(r[2], 75.0)]
+    back_rects = [r for r in _rects(back) if close(r[2], 75.0)]
+    assert front_rects and back_rects
+    assert all(close(r[0], 25.0) for r in front_rects), "recto text block starts at the gutter"
+    assert all(close(r[0], 5.0) for r in back_rects), "verso text block starts at the outer edge"
+
+    # The binding rule mirrors with it: 20mm from the left, 20mm from the right.
+    assert '<line x1="20"' in front
+    assert '<line x1="85"' in back
+    assert 20.0 == document.width - 85.0
 
 
 def test_custom_module_registers():

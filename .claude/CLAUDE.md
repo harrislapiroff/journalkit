@@ -41,6 +41,10 @@ for checking layout against the original artwork in millimetres.
   0.15 mm. `tests/test_pagekit.py::test_daily_matches_the_original_artwork`
   pins those coordinates; if it fails, the layout maths changed.
 
+- **Colour flows from one value.** `theme.ink` stands behind stroke, label,
+  heading, dots and lines via `$theme.ink`; a new colour role should point at
+  it rather than hard-code a hex. White knockouts are not themed on purpose.
+
 ## Conventions
 
 - All internal lengths are floats in **millimetres**; one SVG user unit = 1 mm.

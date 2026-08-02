@@ -245,11 +245,38 @@ data and rewrites fills to `currentColor`. The current set (`sunrise`, `moon`,
 Deep-merged over the defaults in `pagekit/theme.py`. Anything can be overridden
 per document, per page (`theme:` on a template) or per module.
 
+### Colour
+
+One value, `ink`, stands behind every mark on the page — strokes, label and
+heading text, dots and rules all default to `$theme.ink`. To recolour a whole
+document, set it once:
+
 ```yaml
 theme:
-  stroke: "#231F20"
+  ink: "#000"        # pure black everywhere
+```
+
+Any single role can still be pinned without disturbing the rest, which is the
+usual way to soften the dot grid relative to the text:
+
+```yaml
+theme:
+  ink: "#000"
+  dots: {colour: "#999"}
+```
+
+The default `ink` is `#231F20`, the rich black of the original artwork.
+Knockouts (the page background, the white fill behind a checklist marker) are
+deliberately not themed — they have to stay white to mask what is under them.
+
+Any value may point at another with `$theme.<path>`, and chains resolve;
+a cycle raises rather than hanging.
+
+```yaml
+theme:
+  ink: "#231F20"
   stroke_width: 0.25pt
-  font: {family: Montserrat, cap_height: 0.7}
+  font: {family: Montserrat}   # cap_height read from the font
   label: {size: 8pt, weight: 500, dx: 1.8, dy: 3.55}
   heading: {size: 12pt, weight: 700, icon_box: 6, icon_height: 4.6}
 ```

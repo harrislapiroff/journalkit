@@ -12,7 +12,11 @@ import copy
 from .units import mm
 
 DEFAULT_THEME = {
-    "stroke": "#231F20",
+    # The one colour everything else points at.  Override `ink` to recolour a
+    # whole document; override any individual role below to pin just that one.
+    # #231F20 is the rich black of the original artwork; "#000" is pure black.
+    "ink": "#231F20",
+    "stroke": "$theme.ink",
     "stroke_width": "0.25pt",
     "fill": "none",
     "font": {
@@ -31,7 +35,7 @@ DEFAULT_THEME = {
         "size": "8pt",
         "weight": 500,
         "tracking": 0,
-        "colour": "#231F20",
+        "colour": "$theme.ink",
         # Baseline offset from the module's top-left corner.  dx is the text
         # anchor, so the visible ink starts ~0.3mm further right.
         "dx": 1.8,
@@ -41,14 +45,14 @@ DEFAULT_THEME = {
         "size": "12pt",
         "weight": 700,
         "tracking": 0,
-        "colour": "#231F20",
+        "colour": "$theme.ink",
         "icon_box": 6.0,
         "icon_height": 4.6,
         "icon_gap": 1.0,
     },
     "dots": {
         "radius": 0.125,
-        "colour": "#231F20",
+        "colour": "$theme.ink",
         "opacity": 1.0,
         # Keep dots clear of a module's label: "band" clears the label's full
         # line, "text" clears only the estimated width of the text, "none"
@@ -69,7 +73,7 @@ DEFAULT_THEME = {
     },
     "lines": {
         "spacing": 5.0,
-        "colour": "#231F20",
+        "colour": "$theme.ink",
         "opacity": 0.45,
     },
 }
@@ -93,7 +97,7 @@ class Theme:
     def __init__(self, data: dict | None = None):
         self.data = deep_merge(DEFAULT_THEME, data or {})
 
-    def get(self, path: str, default=_MISSING):
+    def _lookup(self, path: str, default=_MISSING):
         node = self.data
         for part in path.split("."):
             if not isinstance(node, dict) or part not in node:
@@ -102,6 +106,23 @@ class Theme:
                 return default
             node = node[part]
         return node
+
+    def get(self, path: str, default=_MISSING):
+        """A theme value, following any ``$theme.other.key`` indirection.
+
+        Indirection is what lets one value stand behind many: every colour in
+        the defaults points at ``ink``, so setting ``ink`` recolours the whole
+        page while any individual role can still be pinned to its own value.
+        """
+        value = self._lookup(path, default)
+        seen = set()
+        while isinstance(value, str) and value.startswith("$theme."):
+            ref = value[len("$theme."):]
+            if ref in seen:
+                raise ValueError("circular theme reference: %s -> %s" % (path, ref))
+            seen.add(ref)
+            value = self._lookup(ref, default)
+        return value
 
     def mm(self, path: str, default=_MISSING) -> float:
         return mm(self.get(path, default))

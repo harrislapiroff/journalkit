@@ -25,7 +25,7 @@ defaults:
   gap: 2.5         # default vertical gap between modules
 
 theme:
-  stroke: "#000"      # rich black, as in the original artwork
+  ink: "#000"            # one colour for strokes, text and dots
   stroke_width: 0.125pt
   font:
     family: Montserrat
@@ -102,6 +102,12 @@ templates:
         label: CONTINUED
         height: fill
         dots: true
+
+      - type: checklist
+        rows: 8
+        row_height: 5
+        row_gap: 2.5
+
 
 pages:
   - template: daily-front
