@@ -14,14 +14,21 @@ spread — 105 × 170 mm, 25 mm gutter, 0.25 pt rules, 5 mm dot grid — to with
 
 ## Setup
 
-Entry points are declared in `pyproject.toml`; there is no Makefile.
+Everything is declared in `pyproject.toml`; there is no Makefile.
+
+```sh
+poetry install
+```
+
+`poetry.toml` pins the virtualenv to `./.venv`, which the rest of this repo
+assumes. Without Poetry, the same result in two stdlib commands:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/pip install -e .
 ```
 
-That installs PyYAML and puts two console scripts in `.venv/bin/`:
+Either way you get PyYAML and two console scripts in `.venv/bin/`:
 
 | script | purpose |
 |---|---|

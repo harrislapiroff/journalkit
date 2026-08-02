@@ -10,9 +10,13 @@ Pure Python + PyYAML; Inkscape and Ghostscript are only needed for PDF/PNG.
 Setup and the task runner live in `pyproject.toml` — **there is no Makefile.**
 
 ```sh
-python3 -m venv .venv && .venv/bin/pip install -e .
+poetry install                  # or: python3 -m venv .venv && .venv/bin/pip install -e .
 .venv/bin/pagekit-dev smoke     # build + tests + grid + font checks
 ```
+
+`poetry.toml` pins the virtualenv to `./.venv`. Don't remove it — `doctor`,
+the run skill's documented paths and the permission allowlist all assume
+`.venv/bin/`, and Poetry otherwise hides the venv in its global cache.
 
 To drive, screenshot, or verify the renderer, use the `run-pagekit` skill
 (`.claude/skills/run-pagekit/SKILL.md`) — it documents the `pagekit-dev`

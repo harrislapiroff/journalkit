@@ -54,14 +54,20 @@ the venv, so use `.venv/bin/pagekit-dev` for those.
 There is no Makefile — the entry points live in `pyproject.toml`.
 
 ```bash
+poetry install
+```
+
+Takes ~1.5s from clean. Without Poetry, two stdlib commands do the same job
+in ~6s:
+
+```bash
 python3 -m venv .venv
 .venv/bin/pip install -e .
 ```
 
-That pulls PyYAML (declared in `dependencies`) and installs two console
-scripts into `.venv/bin/`: `pagekit` (the renderer) and `pagekit-dev` (this
-harness). Takes ~6s from clean. The editable install is what makes both
-cwd-independent — see Gotchas.
+Either path pulls PyYAML and installs two console scripts into `.venv/bin/`:
+`pagekit` (the renderer) and `pagekit-dev` (this harness). The editable
+install is what makes both cwd-independent — see Gotchas.
 
 ## Run (agent path)
 

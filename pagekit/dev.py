@@ -49,7 +49,14 @@ OUT = ROOT / "out"
 PX_PER_MM = 96 / 25.4
 GRID = 2.5
 FONT = "Montserrat"
-SETUP_HINT = "python3 -m venv .venv && .venv/bin/pip install -e ."
+PIP_SETUP = "python3 -m venv .venv && .venv/bin/pip install -e ."
+
+
+def _setup_hint() -> str:
+    """The setup command to suggest, for whichever toolchain is available."""
+    if (ROOT / "poetry.lock").exists() and shutil.which("poetry"):
+        return "poetry install"
+    return PIP_SETUP
 
 sys.path.insert(0, str(ROOT))
 
@@ -97,13 +104,13 @@ def cmd_doctor(args) -> int:
     if venv_py.exists():
         ok("venv      %s" % venv_py)
     else:
-        bad("venv      missing — run: %s" % SETUP_HINT)
+        bad("venv      missing — run: %s" % _setup_hint())
         problems.append("venv")
 
     if (ROOT / ".venv" / "bin" / "pagekit").exists():
         ok("pagekit   console script installed (cwd-independent)")
     else:
-        bad("pagekit   console script missing — run: .venv/bin/pip install -e .")
+        bad("pagekit   console script missing — run: %s" % _setup_hint())
         problems.append("pagekit-script")
 
     # Check pyyaml *in the venv*, not in whichever interpreter is running this
@@ -114,7 +121,7 @@ def cmd_doctor(args) -> int:
         if probe.returncode == 0:
             ok("pyyaml    %s (in venv)" % probe.stdout.strip())
         else:
-            bad("pyyaml    missing from venv — run: .venv/bin/pip install -e .")
+            bad("pyyaml    missing from venv — run: %s" % _setup_hint())
             problems.append("pyyaml")
     else:
         bad("pyyaml    unknown — no venv to check")

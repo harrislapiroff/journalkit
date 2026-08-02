@@ -65,6 +65,7 @@ templates:
       - type: box
         label: NOTES/REFLECTION
         height: 22.5
+        dots: true
 
       - type: checklist
         rows: 5
@@ -85,6 +86,7 @@ templates:
       - type: box
         label: NOTES/REFLECTION
         height: fill          # absorbs whatever is left
+        dots: true
 
       - type: box
         label: GRATITUDE
