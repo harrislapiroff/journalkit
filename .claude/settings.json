@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(inkscape --query-all *)",
+      "Bash(gs -q -dNODISPLAY *)",
+      "Bash(.venv/bin/pagekit modules)",
+      "Bash(.venv/bin/pagekit build *)",
+      "Bash(.venv/bin/pagekit-dev doctor)",
+      "Bash(.venv/bin/pagekit-dev smoke)",
+      "Bash(.venv/bin/pagekit-dev test)",
+      "Bash(.venv/bin/pagekit-dev grid *)",
+      "Bash(.venv/bin/pagekit-dev grid)",
+      "Bash(.venv/bin/pagekit-dev ink *)",
+      "Bash(.venv/bin/pagekit-dev ink)",
+      "Bash(.venv/bin/pagekit-dev geom *)",
+      "Bash(.venv/bin/pagekit-dev fonts *)",
+      "Bash(.venv/bin/pagekit-dev fonts)",
+      "Bash(.venv/bin/pagekit-dev pages *)",
+      "Bash(.venv/bin/pagekit-dev shot *)",
+      "Bash(.venv/bin/pagekit-dev build *)",
+      "Bash(python3 -m pagekit.dev doctor)"
+    ]
+  }
+}

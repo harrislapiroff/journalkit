@@ -1,0 +1,102 @@
+# Weekly spread — exercises the parts the daily page doesn't: rows, ruled
+# lines, a bare dot field, and a project-local module type.
+#
+#   ../.venv/bin/python -m pagekit build templates/weekly.yaml --pdf
+
+document: weekly
+
+modules:
+  - ../custom/habits.py      # registers `habit_grid`
+
+page:
+  size: [105, 170]
+  margins: {top: 2.5, bottom: 7.5, inner: 25, outer: 5}
+
+grid:
+  module: 2.5
+  dots: {spacing: 5, origin: [0, 2.5], radius: 0.125}
+
+defaults:
+  gap: 2.5
+
+theme:
+  font: {family: Montserrat}
+  label: {size: 8pt, weight: 500}
+  heading: {size: 12pt, weight: 700}
+
+decorations:
+  - type: rule
+    edge: inner
+    offset: 5
+
+templates:
+
+  week-plan:
+    side: right
+    content:
+      - type: fields
+        columns:
+          - {label: WEEK, width: 25}
+          - {label: FROM}
+          - {label: TO}
+
+      - type: heading
+        text: FOCUS
+        gap: 2.5
+
+      - type: box
+        height: 15
+        dots: true
+
+      - type: heading
+        text: HABITS
+
+      - type: habit_grid
+        headers: [M, T, W, T, F, S, S]
+        habits: [MOVE, READ, WATER, SLEEP]
+        label_width: 25
+        row_height: 5
+
+      - type: heading
+        text: WEEK
+        gap: 5
+
+      # Two half-width columns of day boxes.
+      - type: row
+        height: fill
+        gap_between: 2.5
+        content:
+          - type: stack
+            gap_between: 2.5
+            content:
+              - {type: box, label: MON, height: fill}
+              - {type: box, label: TUE, height: fill}
+              - {type: box, label: WED, height: fill}
+          - type: stack
+            gap_between: 2.5
+            content:
+              - {type: box, label: THU, height: fill}
+              - {type: box, label: FRI, height: fill}
+              - {type: box, label: "SAT / SUN", height: fill}
+
+  week-notes:
+    side: left
+    content:
+      - type: heading
+        text: NOTES
+
+      - type: lines
+        height: 60
+        spacing: 5
+        border: true
+        label: LOG
+
+      - type: rule
+        gap: 2.5
+
+      - type: dotfield
+        height: fill
+
+pages:
+  - template: week-plan
+  - template: week-notes

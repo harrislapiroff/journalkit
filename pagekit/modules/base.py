@@ -1,0 +1,171 @@
+"""Module base class and registry.
+
+Adding a module type is one class and one decorator::
+
+    from ..geometry import Rect
+    from .base import Module, register
+
+    @register("stamp")
+    class Stamp(Module):
+        \"\"\"A dashed box to stick a photo in.\"\"\"
+        params = {"label": "text drawn above the box"}
+
+        def natural_height(self, width):
+            return 40.0
+
+        def draw(self, canvas, rect):
+            canvas.rect(rect.x, rect.y, rect.w, rect.h,
+                        fill="none", stroke=self.stroke,
+                        stroke_width=self.stroke_width, stroke_dasharray="1 1")
+
+Import the file from ``pagekit/modules/__init__.py`` and it is usable as
+``type: stamp`` in YAML.
+
+Everything a module needs beyond its own spec comes from ``self.ctx``
+(:class:`pagekit.render.RenderContext`): the theme, the icon set, the page
+geometry and the page-wide dot lattice.
+"""
+
+from __future__ import annotations
+
+from ..units import is_fill, mm
+
+REGISTRY: dict[str, type] = {}
+
+
+def register(name: str):
+    def decorate(cls):
+        cls.name = name
+        if name in REGISTRY:
+            raise ValueError("module type %r registered twice" % name)
+        REGISTRY[name] = cls
+        return cls
+
+    return decorate
+
+
+def build(spec, ctx) -> "Module":
+    """Instantiate a module from its YAML mapping."""
+    if isinstance(spec, str):  # bare "spacer" style shorthand
+        spec = {"type": spec}
+    if not isinstance(spec, dict):
+        raise ValueError("module must be a mapping, got %r" % (spec,))
+    kind = spec.get("type")
+    if not kind:
+        raise ValueError("module is missing 'type': %r" % (spec,))
+    if kind not in REGISTRY:
+        raise ValueError("unknown module type %r (known: %s)" % (kind, ", ".join(sorted(REGISTRY))))
+    return REGISTRY[kind](spec, ctx)
+
+
+class Module:
+    """Base class for everything that can appear in a page's ``content``."""
+
+    name = "module"
+    #: ``{param: description}`` — documentation only, surfaced by --list-modules.
+    params: dict[str, str] = {}
+
+    def __init__(self, spec: dict, ctx):
+        self.spec = spec
+        self.ctx = ctx
+        self.theme = ctx.theme.derive(spec.get("theme"))
+        self.id = spec.get("id")
+
+    # -- convenience accessors --------------------------------------------
+    def opt(self, key, default=None):
+        """A spec value, with ``$theme.x`` references expanded."""
+        return self.theme.resolve(self.spec.get(key, default), default)
+
+    def length(self, key, default=None):
+        value = self.spec.get(key, default)
+        if value is None:
+            return None
+        return mm(self.theme.resolve(value))
+
+    @property
+    def stroke(self) -> str:
+        return self.opt("stroke", self.theme.get("stroke"))
+
+    @property
+    def stroke_width(self) -> float:
+        return mm(self.opt("stroke_width", self.theme.get("stroke_width")))
+
+    # -- sizing ------------------------------------------------------------
+    def natural_height(self, width: float):
+        """Intrinsic height in mm, or ``None`` if the module has no opinion."""
+        return None
+
+    def natural_width(self, height: float):
+        return None
+
+    def requested_height(self, width: float):
+        """Resolved ``height``: a float, or the string ``"fill"``."""
+        value = self.spec.get("height")
+        if is_fill(value):
+            return "fill"
+        if value is not None:
+            return mm(self.theme.resolve(value))
+        natural = self.natural_height(width)
+        return "fill" if natural is None else natural
+
+    def requested_width(self, height: float):
+        value = self.spec.get("width")
+        if is_fill(value):
+            return "fill"
+        if value is not None:
+            return mm(self.theme.resolve(value))
+        natural = self.natural_width(height)
+        return "fill" if natural is None else natural
+
+    def fill_weight(self) -> float:
+        """Relative share of leftover space when this module is ``fill``."""
+        weight = self.spec.get("flex", 1)
+        try:
+            return max(float(weight), 0.0) or 1.0
+        except (TypeError, ValueError):
+            return 1.0
+
+    # -- drawing -----------------------------------------------------------
+    def draw(self, canvas, rect):  # pragma: no cover - abstract
+        raise NotImplementedError("%s.draw" % type(self).__name__)
+
+    # -- shared helpers ----------------------------------------------------
+    def text(self, canvas, x, y, content, style="label", **overrides):
+        """Draw themed text with its baseline at ``(x, y)``."""
+        size = mm(overrides.pop("size", None) or self.theme.get("%s.size" % style))
+        weight = overrides.pop("weight", None) or self.theme.get("%s.weight" % style)
+        colour = overrides.pop("colour", None) or self.theme.get("%s.colour" % style)
+        tracking = mm(overrides.pop("tracking", None) or self.theme.get("%s.tracking" % style, 0))
+        family = overrides.pop("family", None) or self.theme.get("font.family")
+        attrs = dict(
+            font_family=family,
+            font_size=size,
+            font_weight=weight,
+            fill=colour,
+            **overrides,
+        )
+        if tracking:
+            attrs["letter_spacing"] = tracking
+        canvas.text(x, y, content, **attrs)
+
+    def cap_height(self, style="label") -> float:
+        return mm(self.theme.get("%s.size" % style)) * float(self.theme.get("font.cap_height"))
+
+    def draw_label(self, canvas, rect, text=None):
+        """Top-left label, positioned by ``theme.label.dx`` / ``dy``."""
+        text = self.opt("label") if text is None else text
+        if not text:
+            return
+        self.text(
+            canvas,
+            rect.x + self.theme.mm("label.dx"),
+            rect.y + self.theme.mm("label.dy"),
+            text,
+            style="label",
+        )
+
+    def draw_dots(self, canvas, rect):
+        """Fill ``rect`` with the page-wide dot lattice, if ``dots`` is on."""
+        if not self.spec.get("dots"):
+            return
+        self.ctx.draw_dots(canvas, rect, options=self.spec.get("dots"))

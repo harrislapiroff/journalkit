@@ -1,0 +1,112 @@
+"""Theme: the shared look every module draws with.
+
+A theme is a nested dict, deep-merged over :data:`DEFAULT_THEME`.  Modules read
+it through :class:`Theme`, which resolves dotted keys and understands the
+``$theme.path`` indirection so a module spec can say ``stroke: $theme.rule``.
+"""
+
+from __future__ import annotations
+
+import copy
+
+from .units import mm
+
+DEFAULT_THEME = {
+    "stroke": "#231F20",
+    "stroke_width": "0.25pt",
+    "fill": "none",
+    "font": {
+        "family": "Montserrat",
+        # Fraction of the em box occupied by capitals.  Used to place
+        # baselines from a box edge or centre; 0.7 is right for Montserrat.
+        "cap_height": 0.7,
+    },
+    "label": {
+        "size": "8pt",
+        "weight": 500,
+        "tracking": 0,
+        "colour": "#231F20",
+        # Baseline offset from the module's top-left corner.  dx is the text
+        # anchor, so the visible ink starts ~0.3mm further right.
+        "dx": 1.8,
+        "dy": 3.55,
+    },
+    "heading": {
+        "size": "12pt",
+        "weight": 700,
+        "tracking": 0,
+        "colour": "#231F20",
+        "icon_box": 6.0,
+        "icon_height": 4.6,
+        "icon_gap": 1.0,
+    },
+    "dots": {
+        "radius": 0.125,
+        "colour": "#231F20",
+        "opacity": 1.0,
+    },
+    "checklist": {
+        "marker": "circle-slash",
+        "marker_size": 5.0,
+        "marker_gap": 2.5,
+        "marker_fill": "#ffffff",
+    },
+    "rating": {
+        "icon_size": 3.0,
+        "icon_gap": 2.0,
+        "pad_right": 1.5,
+    },
+    "lines": {
+        "spacing": 5.0,
+        "colour": "#231F20",
+        "opacity": 0.45,
+    },
+}
+
+
+def deep_merge(base: dict, override: dict) -> dict:
+    """Recursively merge ``override`` into a copy of ``base``."""
+    out = copy.deepcopy(base)
+    for key, value in (override or {}).items():
+        if isinstance(value, dict) and isinstance(out.get(key), dict):
+            out[key] = deep_merge(out[key], value)
+        else:
+            out[key] = copy.deepcopy(value)
+    return out
+
+
+_MISSING = object()
+
+
+class Theme:
+    def __init__(self, data: dict | None = None):
+        self.data = deep_merge(DEFAULT_THEME, data or {})
+
+    def get(self, path: str, default=_MISSING):
+        node = self.data
+        for part in path.split("."):
+            if not isinstance(node, dict) or part not in node:
+                if default is _MISSING:
+                    raise KeyError("theme has no key %r" % path)
+                return default
+            node = node[part]
+        return node
+
+    def mm(self, path: str, default=_MISSING) -> float:
+        return mm(self.get(path, default))
+
+    def resolve(self, value, default=_MISSING):
+        """Expand a ``$theme.some.key`` reference; pass anything else through."""
+        if isinstance(value, str) and value.startswith("$theme."):
+            return self.get(value[len("$theme.") :], default)
+        if value is None and default is not _MISSING:
+            return default
+        return value
+
+    def derive(self, override: dict | None) -> "Theme":
+        """A child theme, for per-page or per-module overrides."""
+        if not override:
+            return self
+        child = Theme.__new__(Theme)
+        child.data = deep_merge(self.data, override)
+        return child

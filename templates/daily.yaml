@@ -1,0 +1,104 @@
+# Daily journal spread — a reproduction of the original Illustrator design.
+#
+#   ../.venv/bin/python -m pagekit build templates/daily.yaml --pdf
+#
+# All lengths are millimetres unless suffixed (0.25pt, 1in, 12px).
+
+document: daily
+
+page:
+  size: [105, 170]
+  margins:
+    top: 2.5
+    bottom: 7.5
+    inner: 25      # binding side — wide, so the text block clears the stitching
+    outer: 5
+
+grid:
+  module: 2.5      # every module snaps to this
+  dots:
+    spacing: 5
+    origin: [0, 2.5]   # page-anchored, so dots line up across modules
+    radius: 0.125
+
+defaults:
+  gap: 2.5         # default vertical gap between modules
+
+theme:
+  stroke: "#231F20"      # rich black, as in the original artwork
+  stroke_width: 0.25pt
+  font:
+    family: Montserrat
+  label:
+    size: 8pt
+    weight: 500
+  heading:
+    size: 12pt
+    weight: 700
+
+# Drawn on every page; `inner` mirrors automatically between recto and verso.
+decorations:
+  - type: rule
+    edge: inner
+    offset: 5
+
+templates:
+
+  daily-front:
+    side: right
+    content:
+      - type: fields
+        height: 5
+        columns: [DATE, "LOC."]
+
+      - type: heading
+        text: MORNING
+        icon: sunrise
+        gap: 2.5
+
+      - type: rating
+        label: MOOD
+        icon: mood
+        count: 5
+        gap: 0
+
+      - type: box
+        label: NOTES/REFLECTION
+        height: 22.5
+
+      - type: checklist
+        rows: 5
+        row_height: 5
+        row_gap: 2.5
+
+      - type: heading
+        text: EVENING
+        icon: moon
+        gap: 5
+
+      - type: rating
+        label: MOOD
+        icon: mood
+        count: 5
+        gap: 0
+
+      - type: box
+        label: NOTES/REFLECTION
+        height: fill          # absorbs whatever is left
+
+      - type: box
+        label: GRATITUDE
+        height: 20
+        dots: true
+
+  daily-back:
+    side: left
+    content:
+      - type: box
+        label: CONTINUED
+        height: fill
+        dots: true
+
+pages:
+  - template: daily-front
+  - template: daily-back
