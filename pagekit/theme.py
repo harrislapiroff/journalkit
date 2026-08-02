@@ -20,6 +20,11 @@ DEFAULT_THEME = {
         # Fraction of the em box occupied by capitals.  Used to place
         # baselines from a box edge or centre; 0.7 is right for Montserrat.
         "cap_height": 0.7,
+        # Rough mean advance per character, only used to estimate how wide a
+        # label is when dots.reserve_label is "text".  Measured Montserrat
+        # caps run 0.64-0.83em depending on the letters, so this is set high
+        # enough to over-reserve rather than clip a dot into a title.
+        "avg_advance": 0.75,
     },
     "label": {
         "size": "8pt",
@@ -44,6 +49,11 @@ DEFAULT_THEME = {
         "radius": 0.125,
         "colour": "#231F20",
         "opacity": 1.0,
+        # Keep dots clear of a module's label: "band" clears the label's full
+        # line, "text" clears only the estimated width of the text, "none"
+        # lets dots run underneath it.
+        "reserve_label": "band",
+        "label_pad": 0.75,
     },
     "checklist": {
         "marker": "circle-slash",

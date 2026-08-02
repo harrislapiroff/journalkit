@@ -94,6 +94,30 @@ grid:
 A module whose height isn't a multiple of the module grid is snapped to it and
 a warning is printed; `--strict` turns that into a failure.
 
+### Dots and labels
+
+Dots are omitted where they would collide with a module's label, rather than
+the label being drawn on top of them — on a printed page a dot behind a title
+reads as a smudge. Only points that actually fall in the label's line are
+dropped, so the rest of the grid stays exactly on the lattice.
+
+```yaml
+theme:
+  dots:
+    reserve_label: band   # band (default) | text | none
+    label_pad: 0.75       # extra clearance around the label, mm
+```
+
+| mode | effect |
+|---|---|
+| `band` | clears the label's whole line across the module — the grid starts below the title |
+| `text` | clears only the label's own width, so dots continue to its right |
+| `none` | dots run underneath the label |
+
+`text` estimates the label width from its character count
+(`theme.font.avg_advance`) since there is no font-metrics dependency; it
+deliberately over-reserves rather than risk clipping a dot into a title.
+
 ## Page geometry and mirroring
 
 Margins are named `inner` (binding side) and `outer`, so a template is written

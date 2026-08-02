@@ -32,11 +32,13 @@ class RenderContext:
         self.warnings.append(message)
 
     # -- the page-wide dot lattice ----------------------------------------
-    def dot_points(self, rect: Rect, spacing=None, origin=None, inset=0.0):
-        """Lattice points strictly inside ``rect``.
+    def dot_points(self, rect: Rect, spacing=None, origin=None, inset=0.0, exclude=()):
+        """Lattice points strictly inside ``rect`` and outside every ``exclude``.
 
         The lattice is anchored to the *page*, not to the module, which is what
-        keeps dots lined up across every module on the page.
+        keeps dots lined up across every module on the page.  ``exclude`` drops
+        individual points without shifting the rest, so knocking a hole out for
+        a label leaves the surviving dots on the same lattice.
         """
         spacing = spacing or self.dots.spacing
         ox, oy = origin or self.dots.origin
@@ -51,10 +53,13 @@ class RenderContext:
                 continue
             for i in range(first_i, last_i + 1):
                 x = ox + i * spacing
-                if area.x < x < area.right:
-                    yield x, y
+                if not (area.x < x < area.right):
+                    continue
+                if any(r.contains_point(x, y, strict=False) for r in exclude):
+                    continue
+                yield x, y
 
-    def draw_dots(self, canvas: Canvas, rect: Rect, options=None) -> None:
+    def draw_dots(self, canvas: Canvas, rect: Rect, options=None, exclude=()) -> None:
         config = options if isinstance(options, dict) else {}
         spacing = mm(config["spacing"]) if "spacing" in config else None
         radius = mm(config.get("radius", self.dots.radius))
@@ -65,7 +70,7 @@ class RenderContext:
         if origin is not None:
             origin = (mm(origin[0]), mm(origin[1]))
 
-        points = list(self.dot_points(rect, spacing, origin, inset))
+        points = list(self.dot_points(rect, spacing, origin, inset, exclude))
         if not points:
             return
         canvas.open_group(fill=colour, fill_opacity=None if opacity >= 1 else opacity)

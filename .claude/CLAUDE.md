@@ -30,6 +30,8 @@ for checking layout against the original artwork in millimetres.
   layout engine; `pagekit-dev ink` reports the latter, informationally.
 - **The dot lattice is anchored to the page**, not to the module — that is what
   makes dots line up across modules and across pages. Never phase it per module.
+  Dots that would collide with a label are *dropped*, never shifted, so the
+  survivors stay on the lattice (`theme.dots.reserve_label`).
 - **Mirroring is resolved once**, when the content rect is computed from
   `inner`/`outer` margins. No module should ever branch on `side`.
 - **Text is positioned from `font.cap_height`.** It assumes Montserrat. A

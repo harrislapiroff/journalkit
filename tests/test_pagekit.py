@@ -113,6 +113,63 @@ def test_dots_are_page_anchored_and_strictly_inside():
     assert all(close(y % 5, 2.5) for _, y in top + other)
 
 
+def test_dots_keep_clear_of_a_label():
+    """A dot must never land in the ink of the label above it."""
+    ctx = _context()
+    # A box whose first lattice row (y=27.5) falls inside the label's cap band.
+    module = build({"type": "box", "label": "NOTES/REFLECTION", "dots": True}, ctx)
+    rect = Rect(25, 25, 75, 22.5)
+
+    band = module.label_band(rect)
+    assert band is not None
+    baseline = rect.y + ctx.theme.mm("label.dy")
+    assert band.y < baseline - module.cap_height("label") + 1e-9, "band must cover the cap"
+    assert band.bottom > baseline, "band must cover the baseline"
+
+    rows = {round(y, 2) for _, y in ctx.dot_points(rect)}
+    kept = {round(y, 2) for _, y in ctx.dot_points(rect, exclude=[band])}
+    assert 27.5 in rows and 27.5 not in kept, "the colliding row should be dropped"
+    assert kept == {32.5, 37.5, 42.5}, "every other row must survive untouched"
+
+
+def test_label_clearance_does_not_over_reach():
+    """A label that already clears the first dot row must cost no dots."""
+    ctx = _context()
+    module = build({"type": "box", "label": "GRATITUDE", "dots": True}, ctx)
+    rect = Rect(25, 142.5, 75, 20)
+    band = module.label_band(rect)
+    rows = {round(y, 2) for _, y in ctx.dot_points(rect)}
+    kept = {round(y, 2) for _, y in ctx.dot_points(rect, exclude=[band])}
+    assert rows == kept == {147.5, 152.5, 157.5}
+
+
+def test_unlabelled_module_reserves_nothing():
+    ctx = _context()
+    module = build({"type": "box", "dots": True}, ctx)
+    assert module.label_band(Rect(25, 25, 75, 22.5)) is None
+
+
+def test_label_clearance_modes():
+    ctx = _context()
+    rect = Rect(25, 25, 75, 22.5)
+
+    wide = build({"type": "box", "label": "MOOD", "dots": True,
+                  "theme": {"dots": {"reserve_label": "band"}}}, ctx)
+    narrow = build({"type": "box", "label": "MOOD", "dots": True,
+                    "theme": {"dots": {"reserve_label": "text"}}}, ctx)
+    off = build({"type": "box", "label": "MOOD", "dots": True,
+                 "theme": {"dots": {"reserve_label": "none"}}}, ctx)
+
+    assert close(wide.label_band(rect).w, rect.w), "band spans the module"
+    assert narrow.label_band(rect).w < rect.w, "text mode is narrower"
+    assert off.label_band(rect) is None
+
+    # Only the horizontal extent differs; both clear the same line.
+    assert close(wide.label_band(rect).y, narrow.label_band(rect).y)
+    # Text mode must still be wide enough to cover the drawn glyphs.
+    assert narrow.label_band(rect).w > 4 * mm("8pt") * 0.6
+
+
 def test_dot_spacing_override_per_module():
     ctx = _context()
     fine = list(ctx.dot_points(Rect(25, 25, 10, 10), spacing=2.5))

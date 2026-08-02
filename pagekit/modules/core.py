@@ -59,6 +59,7 @@ class Box(_Framed):
         "height": "mm, or 'fill' to absorb leftover space",
         "dots": "true, or a mapping to override radius/colour/inset",
         "border": "true | false | 'top bottom' | ['left','right']",
+        "theme": "per-module overrides, e.g. {dots: {reserve_label: text}}",
         "background": "fill colour behind the box (default none)",
         "radius": "corner radius in mm",
         "stroke": "border colour (default theme.stroke)",
@@ -115,9 +116,18 @@ class Fields(_Framed):
 
     def draw(self, canvas, rect):
         self.frame(canvas, rect)
-        self.draw_dots(canvas, rect)
+        widths = self._widths(rect.w)
+        reserve = []
         cursor = rect.x
-        for index, (column, width) in enumerate(zip(self.columns, self._widths(rect.w))):
+        for column, width in zip(self.columns, widths):
+            band = self.label_band(Rect(cursor, rect.y, width, rect.h), column.get("label"))
+            if band:
+                reserve.append(band)
+            cursor += width
+        self.draw_dots(canvas, rect, reserve=reserve, label=False)
+
+        cursor = rect.x
+        for index, (column, width) in enumerate(zip(self.columns, widths)):
             if index:
                 canvas.line(cursor, rect.y, cursor, rect.bottom,
                             stroke=self.stroke, stroke_width=self.stroke_width)
@@ -301,9 +311,10 @@ class Checklist(_Framed):
             box = Rect(row.x + marker_size + marker_gap, row.y,
                        row.w - marker_size - marker_gap, row.h)
             self.frame(canvas, box)
-            self.draw_dots(canvas, box)
-            if index < len(labels):
-                self.draw_label(canvas, box, labels[index])
+            row_label = labels[index] if index < len(labels) else None
+            self.draw_dots(canvas, box, label=row_label)
+            if row_label:
+                self.draw_label(canvas, box, row_label)
             y += row_height + row_gap
 
 

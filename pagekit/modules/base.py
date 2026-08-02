@@ -28,6 +28,7 @@ geometry and the page-wide dot lattice.
 
 from __future__ import annotations
 
+from ..geometry import Rect
 from ..units import is_fill, mm
 
 REGISTRY: dict[str, type] = {}
@@ -164,8 +165,55 @@ class Module:
             style="label",
         )
 
-    def draw_dots(self, canvas, rect):
-        """Fill ``rect`` with the page-wide dot lattice, if ``dots`` is on."""
+    def label_band(self, rect, text=None):
+        """The area a top-left label occupies, for dots to keep clear of.
+
+        Returns ``None`` when there is no label or clearance is switched off.
+        Two modes, set by ``theme.dots.reserve_label``:
+
+        ``band`` (default)
+            The full width of the module, for the height of the label's line.
+            The label then sits in a clean strip with the grid starting below
+            it — which reads as deliberate, and needs no font metrics.
+        ``text``
+            Only as wide as the label is estimated to be, so dots continue to
+            the right of a short label.  The width is approximated from the
+            character count (see ``theme.font.avg_advance``), so it is padded
+            generously rather than measured.
+        """
+        text = self.opt("label") if text is None else text
+        if not text:
+            return None
+        mode = self.theme.get("dots.reserve_label", "band")
+        if mode in (None, False, "none"):
+            return None
+
+        size = mm(self.theme.get("label.size"))
+        cap = self.cap_height("label")
+        pad = self.theme.mm("dots.label_pad", 0.75)
+        baseline = rect.y + self.theme.mm("label.dy")
+        top = baseline - cap - pad
+        # Allow for descenders, since a label is not necessarily all caps.
+        bottom = baseline + max(pad, 0.2 * size)
+
+        if mode == "text":
+            advance = float(self.theme.get("font.avg_advance", 0.75))
+            width = len(str(text)) * size * advance + 2 * pad
+            left = rect.x + self.theme.mm("label.dx") - pad
+            return Rect(left, top, min(width, rect.right - left), bottom - top)
+        return Rect(rect.x, top, rect.w, bottom - top)
+
+    def draw_dots(self, canvas, rect, reserve=(), label=None):
+        """Fill ``rect`` with the page-wide dot lattice, if ``dots`` is on.
+
+        Dots are omitted where they would run into the module's label, rather
+        than the label being drawn over them — on a printed page a dot behind
+        a title reads as a smudge.
+        """
         if not self.spec.get("dots"):
             return
-        self.ctx.draw_dots(canvas, rect, options=self.spec.get("dots"))
+        exclude = list(reserve)
+        band = self.label_band(rect, label)
+        if band:
+            exclude.append(band)
+        self.ctx.draw_dots(canvas, rect, options=self.spec.get("dots"), exclude=exclude)
