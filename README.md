@@ -114,9 +114,18 @@ theme:
 | `text` | clears only the label's own width, so dots continue to its right |
 | `none` | dots run underneath the label |
 
-`text` estimates the label width from its character count
-(`theme.font.avg_advance`) since there is no font-metrics dependency; it
-deliberately over-reserves rather than risk clipping a dot into a title.
+`text` measures the label from the font file itself — `pagekit/fontmetrics.py`
+is a small stdlib sfnt reader that pulls advance widths out of `hmtx`/`cmap`,
+so no font library is needed. If the font can't be found it falls back to a
+character-count estimate (`theme.font.avg_advance`), which is a safety net
+only: real Montserrat capitals range from 0.5em to over 0.9em, so the estimate
+under-reserves for wide words like `MOOD` and over-reserves badly for long
+ones.
+
+The same reader supplies the cap height. `theme.font.cap_height` is null by
+default, meaning "read `OS/2` from the font" — Montserrat publishes 0.700,
+which is what the value used to be hard-coded to. Set it explicitly to
+override.
 
 ## Page geometry and mirroring
 
@@ -246,7 +255,8 @@ theme:
 ```
 
 `cap_height` is how baselines get placed: a label's baseline is `dy` below the
-module's top edge, a heading's is centred on its cap height. Lengths accept
+module's top edge, a heading's is centred on its cap height. Leave it null to
+read the true value from the font. Lengths accept
 `mm` (default), `pt`, `cm`, `in`, `px`. Any module value may also point at the
 theme: `stroke: $theme.dots.colour`.
 
@@ -297,6 +307,7 @@ pagekit/            the library
   layout.py         stack and row solving
   theme.py          defaults + deep merge
   icons.py          icon loading and placement
+  fontmetrics.py    stdlib sfnt reader: advance widths + cap height
   svg.py            minimal SVG writer (1 user unit = 1 mm)
   render.py         page rendering, dot lattice, decorations
   cli.py            build / modules

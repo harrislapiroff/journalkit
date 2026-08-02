@@ -117,7 +117,9 @@ def test_dots_keep_clear_of_a_label():
     """A dot must never land in the ink of the label above it."""
     ctx = _context()
     # A box whose first lattice row (y=27.5) falls inside the label's cap band.
-    module = build({"type": "box", "label": "NOTES/REFLECTION", "dots": True}, ctx)
+    # State the mode explicitly: the document's own theme may choose either.
+    module = build({"type": "box", "label": "NOTES/REFLECTION", "dots": True,
+                    "theme": {"dots": {"reserve_label": "band"}}}, ctx)
     rect = Rect(25, 25, 75, 22.5)
 
     band = module.label_band(rect)
@@ -135,7 +137,8 @@ def test_dots_keep_clear_of_a_label():
 def test_label_clearance_does_not_over_reach():
     """A label that already clears the first dot row must cost no dots."""
     ctx = _context()
-    module = build({"type": "box", "label": "GRATITUDE", "dots": True}, ctx)
+    module = build({"type": "box", "label": "GRATITUDE", "dots": True,
+                    "theme": {"dots": {"reserve_label": "band"}}}, ctx)
     rect = Rect(25, 142.5, 75, 20)
     band = module.label_band(rect)
     rows = {round(y, 2) for _, y in ctx.dot_points(rect)}
@@ -145,7 +148,8 @@ def test_label_clearance_does_not_over_reach():
 
 def test_unlabelled_module_reserves_nothing():
     ctx = _context()
-    module = build({"type": "box", "dots": True}, ctx)
+    module = build({"type": "box", "dots": True,
+                    "theme": {"dots": {"reserve_label": "band"}}}, ctx)
     assert module.label_band(Rect(25, 25, 75, 22.5)) is None
 
 
@@ -166,8 +170,44 @@ def test_label_clearance_modes():
 
     # Only the horizontal extent differs; both clear the same line.
     assert close(wide.label_band(rect).y, narrow.label_band(rect).y)
-    # Text mode must still be wide enough to cover the drawn glyphs.
-    assert narrow.label_band(rect).w > 4 * mm("8pt") * 0.6
+    # Text mode must still be wide enough to cover the drawn glyphs.  MOOD is
+    # the case a character-count estimate gets wrong: measured ink is 9.34mm
+    # but 4 chars x 0.75em is only 8.47mm, so an estimate would under-reserve.
+    assert narrow.label_band(rect).w > 9.34
+
+
+def test_font_metrics_are_read_from_the_font():
+    from pagekit import fontmetrics
+
+    metrics = fontmetrics.load("Montserrat", 500)
+    if metrics is None:
+        return  # font not installed on this machine; the estimate path covers it
+    assert metrics.units_per_em == 1000
+    # The value pagekit used to hard-code, now taken from the OS/2 table.
+    assert close(metrics.cap_ratio, 0.7, 0.001)
+
+    size = mm("8pt")
+    # Measured from Inkscape's rendered ink, which excludes side bearings, so
+    # the advance width must be a little wider than each of these.
+    for text, ink in [("DATE", 7.36), ("MOOD", 9.34),
+                      ("NOTES/REFLECTION", 28.85), ("GRATITUDE", 16.51)]:
+        width = metrics.text_width(text, size)
+        assert width > ink, "%s: advance %.2f must cover ink %.2f" % (text, width, ink)
+        assert width < ink + 1.5, "%s: advance %.2f is far too generous" % (text, width)
+
+
+def test_unknown_font_falls_back_without_raising():
+    from pagekit import fontmetrics
+
+    assert fontmetrics.load("NoSuchFamilyXYZ", 400) is None
+
+    ctx = _context()
+    module = build({"type": "box", "label": "MOOD", "dots": True,
+                    "theme": {"font": {"family": "NoSuchFamilyXYZ"},
+                              "dots": {"reserve_label": "text"}}}, ctx)
+    band = module.label_band(Rect(25, 25, 75, 22.5))
+    assert band is not None and band.w > 0, "must still reserve something"
+    assert close(module.cap_ratio("label"), 0.7), "falls back to the default ratio"
 
 
 def test_dot_spacing_override_per_module():

@@ -17,13 +17,14 @@ DEFAULT_THEME = {
     "fill": "none",
     "font": {
         "family": "Montserrat",
-        # Fraction of the em box occupied by capitals.  Used to place
-        # baselines from a box edge or centre; 0.7 is right for Montserrat.
-        "cap_height": 0.7,
-        # Rough mean advance per character, only used to estimate how wide a
-        # label is when dots.reserve_label is "text".  Measured Montserrat
-        # caps run 0.64-0.83em depending on the letters, so this is set high
-        # enough to over-reserve rather than clip a dot into a title.
+        # Fraction of the em occupied by capitals, used to place baselines
+        # from a box edge or centre.  Left null, it is read from the font's
+        # OS/2 table (Montserrat publishes 0.700); set it to override.
+        "cap_height": None,
+        # Fallback mean advance per character, used to estimate label widths
+        # only when the font file cannot be read.  Real Montserrat capitals
+        # range from 0.5em to over 0.9em, so this is a safety net, not a
+        # substitute for pagekit.fontmetrics.
         "avg_advance": 0.75,
     },
     "label": {

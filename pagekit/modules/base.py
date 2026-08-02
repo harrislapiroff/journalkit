@@ -28,6 +28,7 @@ geometry and the page-wide dot lattice.
 
 from __future__ import annotations
 
+from .. import fontmetrics
 from ..geometry import Rect
 from ..units import is_fill, mm
 
@@ -149,8 +150,43 @@ class Module:
             attrs["letter_spacing"] = tracking
         canvas.text(x, y, content, **attrs)
 
+    def font_metrics(self, style="label"):
+        """Parsed metrics for the font this style renders in, or ``None``."""
+        return fontmetrics.load(self.theme.get("font.family"),
+                                self.theme.get("%s.weight" % style, 400))
+
+    def cap_ratio(self, style="label") -> float:
+        """Cap height as a fraction of the em.
+
+        An explicit ``theme.font.cap_height`` wins; otherwise it comes from the
+        font's own ``OS/2`` table, and only failing that from a sane default.
+        """
+        configured = self.theme.get("font.cap_height", None)
+        if configured is not None:
+            return float(configured)
+        metrics = self.font_metrics(style)
+        if metrics and metrics.cap_ratio:
+            return metrics.cap_ratio
+        return fontmetrics.FALLBACK_CAP_RATIO
+
     def cap_height(self, style="label") -> float:
-        return mm(self.theme.get("%s.size" % style)) * float(self.theme.get("font.cap_height"))
+        return mm(self.theme.get("%s.size" % style)) * self.cap_ratio(style)
+
+    def text_width(self, text: str, size: float, style="label") -> float:
+        """Width of ``text`` at ``size``, measured from the font where possible.
+
+        Falls back to a character-count estimate when the font file cannot be
+        read.  The estimate is coarse — real advances for capitals range from
+        0.5em to over 0.9em — so it is only ever a safety net.
+        """
+        if not text:
+            return 0.0
+        tracking = mm(self.theme.get("%s.tracking" % style, 0) or 0)
+        metrics = self.font_metrics(style)
+        if metrics:
+            return metrics.text_width(text, size, tracking)
+        advance = float(self.theme.get("font.avg_advance", 0.75))
+        return len(text) * size * advance + tracking * len(text)
 
     def draw_label(self, canvas, rect, text=None):
         """Top-left label, positioned by ``theme.label.dx`` / ``dy``."""
@@ -197,8 +233,7 @@ class Module:
         bottom = baseline + max(pad, 0.2 * size)
 
         if mode == "text":
-            advance = float(self.theme.get("font.avg_advance", 0.75))
-            width = len(str(text)) * size * advance + 2 * pad
+            width = self.text_width(str(text), size, style="label") + 2 * pad
             left = rect.x + self.theme.mm("label.dx") - pad
             return Rect(left, top, min(width, rect.right - left), bottom - top)
         return Rect(rect.x, top, rect.w, bottom - top)

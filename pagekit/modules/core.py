@@ -174,7 +174,7 @@ class Heading(Module):
             text_x = rect.x + icon_box + icon_gap
 
         size = self.length("size") or self.theme.mm("heading.size")
-        cap = size * float(self.theme.get("font.cap_height"))
+        cap = size * self.cap_ratio("heading")
         baseline = rect.cy + cap / 2.0
         align = self.opt("align", "left")
         anchor = {"left": None, "center": "middle", "right": "end"}.get(align)
@@ -394,7 +394,7 @@ class Text(Module):
     def draw(self, canvas, rect):
         style = self.opt("style", "label")
         size = self.length("size") or self.theme.mm("%s.size" % style)
-        cap = size * float(self.theme.get("font.cap_height"))
+        cap = size * self.cap_ratio(style)
         align = self.opt("align", "left")
         x = {"center": rect.cx, "right": rect.right}.get(align, rect.x)
         anchor = {"center": "middle", "right": "end"}.get(align)

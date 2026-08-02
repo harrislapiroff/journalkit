@@ -25,8 +25,8 @@ defaults:
   gap: 2.5         # default vertical gap between modules
 
 theme:
-  stroke: "#231F20"      # rich black, as in the original artwork
-  stroke_width: 0.25pt
+  stroke: "#000"      # rich black, as in the original artwork
+  stroke_width: 0.125pt
   font:
     family: Montserrat
   label:
@@ -35,6 +35,8 @@ theme:
   heading:
     size: 12pt
     weight: 700
+  dots:
+    reserve_label: text
 
 # Drawn on every page; `inner` mirrors automatically between recto and verso.
 decorations:
