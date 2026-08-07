@@ -296,10 +296,14 @@ def cmd_shot(args) -> int:
     if result.returncode != 0:
         print(result.stdout + result.stderr)
         return 1
-    shots = sorted(dest.glob("*.png"))
+    # Report what *this* build wrote, not whatever is in the directory. Shots
+    # from other templates persist in out/shots, and handing back a stale file
+    # to Read() is worse than handing back none.
+    shots = [Path(line[len("wrote "):]) for line in result.stdout.splitlines()
+             if line.startswith("wrote ") and line.endswith(".png")]
     if args.page is not None:
         shots = [s for s in shots if "-%02d-" % args.page in s.name]
-    for shot in shots:
+    for shot in sorted(shots):
         print(shot)
     if not shots:
         print("no PNGs produced", file=sys.stderr)
