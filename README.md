@@ -8,9 +8,10 @@ print-ready SVG and PDF.
 .venv/bin/pagekit build templates/daily.yaml --pdf
 ```
 
-`templates/daily.yaml` reproduces the original Illustrator daily-journal
-spread — 105 × 170 mm, 25 mm gutter, 0.25 pt rules, 5 mm dot grid — to within
-0.15 mm of the source artwork.
+`templates/daily.yaml` is the daily-journal spread — 105 × 170 mm, 16 mm
+gutter, 0.25 pt rules, 4 mm dot grid on a 2 mm module grid. It began as a
+reproduction of the original Illustrator artwork (25 mm gutter, 5 mm dots) and
+has since been redrawn on the finer grid.
 
 ## Setup
 
@@ -119,15 +120,40 @@ across pages — no matter where a module lands. Turn dots on per module with
 
 ```yaml
 grid:
-  module: 2.5
+  module: 2          # what templates/ uses; the built-in default is 2.5
   dots:
-    spacing: 5
-    origin: [0, 2.5]   # lattice passes through x ≡ 0, y ≡ 2.5 (mm, page coords)
+    spacing: 4
+    origin: [0, 2]   # lattice passes through x ≡ 0, y ≡ 2 (mm, page coords)
     radius: 0.125
 ```
 
 A module whose height isn't a multiple of the module grid is snapped to it and
-a warning is printed; `--strict` turns that into a failure.
+a warning is printed; `--strict` turns that into a failure. That applies to
+heights *you* wrote. A module's own intrinsic height — a heading's 7.5 mm —
+is snapped silently, because no template could fix it.
+
+### Choosing a grid your page can actually hold
+
+Both grids are anchored to the page, so the page has to be commensurate with
+them, and mirrored margins make that stricter than it looks:
+
+* on a recto the text block starts at `inner`, so `inner` must be a multiple
+  of the grid;
+* on a verso it starts at `outer`, so `outer` must be too;
+* the block's width is `page − inner − outer`, so the **page dimension** must
+  be a multiple of the grid as well.
+
+105 mm is 42 × 2.5, which is why the original design sat perfectly on a 2.5 mm
+grid. It is *not* a multiple of 2: on a 2 mm grid one of the two margins has
+to be odd, and that page's verso is unavoidably half a grid step off the
+lattice. `templates/daily.yaml` accepts this — its verso text block sits 1 mm
+off, so the dots inside it are 3 mm from the left border and 1 mm from the
+right, where the recto's are 4 mm from both.
+
+`pagekit-dev grid` reports that as a per-page note rather than a failure, and
+checks module placements against the page's own offset — so it still catches
+the thing that is a bug (a module drifting off the grid) on a page that has
+knowingly given up the thing that is a choice.
 
 ### Dots and labels
 
@@ -170,7 +196,7 @@ once and mirrors itself:
 ```yaml
 page:
   size: [105, 170]      # or a name: a4, a5, a6, b6, letter, half-letter, pocket
-  margins: {top: 2.5, bottom: 7.5, inner: 25, outer: 5}
+  margins: {top: 2, bottom: 8, inner: 16, outer: 5}
 ```
 
 `side: right` (recto) puts the binding on the left, `side: left` (verso) on the
@@ -181,14 +207,14 @@ content rect is computed.
 
 ### Decorations
 
-Page furniture that sits outside the content flow, e.g. the vertical rule 5 mm
+Page furniture that sits outside the content flow, e.g. the vertical rule 4 mm
 inside the binding margin:
 
 ```yaml
 decorations:
   - type: rule
     edge: inner      # inner | outer | left | right | top | bottom
-    offset: 5        # measured away from the text block, so it mirrors
+    offset: 4        # measured away from the text block, so it mirrors
 ```
 
 For anything else, place it explicitly. `x`/`y` accept a number (page mm) or

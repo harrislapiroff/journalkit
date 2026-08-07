@@ -10,14 +10,15 @@ modules:
 
 page:
   size: [105, 170]
-  margins: {top: 2.5, bottom: 7.5, inner: 25, outer: 5}
+  # Even margins, to match the 2mm module grid — see the note in daily.yaml.
+  margins: {top: 2, bottom: 8, inner: 16, outer: 5}
 
 grid:
-  module: 2.5
-  dots: {spacing: 5, origin: [0, 2.5], radius: 0.125}
+  module: 2
+  dots: {spacing: 4, origin: [0, 2], radius: 0.125}
 
 defaults:
-  gap: 2.5
+  gap: 2
 
 theme:
   font: {family: Montserrat}
@@ -27,7 +28,7 @@ theme:
 decorations:
   - type: rule
     edge: inner
-    offset: 5
+    offset: 4
 
 templates:
 
@@ -36,16 +37,16 @@ templates:
     content:
       - type: fields
         columns:
-          - {label: WEEK, width: 25}
+          - {label: WEEK, width: 24}
           - {label: FROM}
           - {label: TO}
 
       - type: heading
         text: FOCUS
-        gap: 2.5
+        gap: 2
 
       - type: box
-        height: 15
+        height: 16
         dots: true
 
       - type: heading
@@ -54,26 +55,26 @@ templates:
       - type: habit_grid
         headers: [M, T, W, T, F, S, S]
         habits: [MOVE, READ, WATER, SLEEP]
-        label_width: 25
-        row_height: 5
+        label_width: 24
+        row_height: 4
 
       - type: heading
         text: WEEK
-        gap: 5
+        gap: 4
 
       # Two half-width columns of day boxes.
       - type: row
         height: fill
-        gap_between: 2.5
+        gap_between: 2
         content:
           - type: stack
-            gap_between: 2.5
+            gap_between: 2
             content:
               - {type: box, label: MON, height: fill}
               - {type: box, label: TUE, height: fill}
               - {type: box, label: WED, height: fill}
           - type: stack
-            gap_between: 2.5
+            gap_between: 2
             content:
               - {type: box, label: THU, height: fill}
               - {type: box, label: FRI, height: fill}
@@ -87,12 +88,12 @@ templates:
 
       - type: lines
         height: 60
-        spacing: 5
+        spacing: 4
         border: true
         label: LOG
 
       - type: rule
-        gap: 2.5
+        gap: 2
 
       - type: dotfield
         height: fill

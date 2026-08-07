@@ -59,11 +59,18 @@ def _resolve(children, extent, gap_default, grid, axis, cross, ctx):
         requested = [c.requested_width(cross) for c in children]
 
     fixed = [0.0 if r == "fill" else snap(r, grid) for r in requested]
+    key = "height" if axis == "h" else "width"
     for child, want, got in zip(children, requested, fixed):
-        if want != "fill" and abs(want - got) > 1e-6:
+        if want == "fill" or abs(want - got) <= 1e-6:
+            continue
+        # Only a size the *author* wrote is worth warning about. A module's
+        # intrinsic height (a heading's 7.5mm, say) is a suggestion the engine
+        # is expected to round — on a 2mm grid that would otherwise warn on
+        # every heading, for something no template could fix.
+        if child.spec.get(key) is not None:
             ctx.warn(
                 "%s: %s %.3fmm is off the %.3fmm grid, snapped to %.3fmm"
-                % (child.name, "height" if axis == "h" else "width", want, grid, got)
+                % (child.name, key, want, grid, got)
             )
 
     leftover = extent - sum(fixed) - sum(gaps)

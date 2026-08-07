@@ -44,12 +44,21 @@ def test_geometry():
 
 # --------------------------------------------------------------------------
 def _context(**overrides):
+    """A context for testing the *engine*, on a lattice of its own.
+
+    The theme and icon set come from daily.yaml because it is a convenient
+    source of both, but the grid and dot lattice are pinned here rather than
+    inherited. The tests below assert specific lattice coordinates (27.5,
+    32.5, …) to check the dot machinery; if they rode on the template, every
+    redesign of the notebook would break tests that have nothing to do with
+    the notebook.
+    """
     document = spec.load(ROOT / "templates" / "daily.yaml")
     renderer = Renderer(document)
     page, content = renderer.content_rect(document.pages[0])
     defaults = dict(
-        theme=document.theme, icons=renderer.icons, grid=document.grid,
-        default_gap=document.default_gap, dots=document.dots,
+        theme=document.theme, icons=renderer.icons, grid=2.5,
+        default_gap=2.5, dots=spec.DotGrid(spacing=5.0, origin=(0.0, 2.5)),
         page=page, content=content, side="right",
     )
     defaults.update(overrides)
@@ -87,6 +96,26 @@ def test_off_grid_height_is_snapped_and_warned():
     children = [build({"type": "box", "height": 11}, ctx)]
     placements = layout_stack(children, Rect(0, 0, 75, 100), 2.5, 2.5, ctx)
     assert close(placements[0].rect.h, 10.0)
+    assert any("grid" in w for w in ctx.warnings)
+
+
+def test_intrinsic_height_is_snapped_without_warning():
+    """Only a size the author wrote is worth complaining about.
+
+    A heading's intrinsic 7.5mm cannot sit on a 2mm grid, and no template can
+    fix that — warning about it would put an unactionable line under every
+    heading on a 2mm page.
+    """
+    ctx = _context(grid=2.0)
+    children = [build({"type": "heading", "text": "MORNING"}, ctx)]
+    placements = layout_stack(children, Rect(0, 0, 84, 100), 2.0, 2.0, ctx)
+    assert close(placements[0].rect.h, 8.0), "still snapped to the grid"
+    assert not ctx.warnings, "but silently: the template did not choose 7.5"
+
+    # An explicit height on the same grid still warns.
+    ctx = _context(grid=2.0)
+    layout_stack([build({"type": "heading", "text": "M", "height": 7}, ctx)],
+                 Rect(0, 0, 84, 100), 2.0, 2.0, ctx)
     assert any("grid" in w for w in ctx.warnings)
 
 
@@ -285,50 +314,39 @@ def _rects(svg: str):
     return out
 
 
-def test_daily_matches_the_original_artwork():
-    """Key coordinates measured from the source Illustrator file."""
-    document = spec.load(ROOT / "templates" / "daily.yaml")
-    assert (document.width, document.height) == (105.0, 170.0)
-
-    svg = Renderer(document).render_all()[0][1]
-    rects = _rects(svg)
-    for expected in [
-        (25.0, 2.5, 75.0, 5.0),      # DATE | LOC.
-        (25.0, 17.5, 75.0, 5.0),     # morning MOOD
-        (25.0, 25.0, 75.0, 22.5),    # morning notes
-        (32.5, 50.0, 67.5, 5.0),     # first checklist writing box
-        (32.5, 80.0, 67.5, 5.0),     # fifth checklist writing box
-        (25.0, 97.5, 75.0, 5.0),     # evening MOOD
-        (25.0, 105.0, 75.0, 35.0),   # evening notes (height: fill)
-        (25.0, 142.5, 75.0, 20.0),   # gratitude
-    ]:
-        assert expected in rects, "missing %r" % (expected,)
-
-    assert '<line x1="20"' in svg.replace("20.0", "20"), "binding rule at x=20"
-    assert "Montserrat" in svg
-
-
 def test_back_page_is_mirrored():
     """The verso must be the recto's mirror image, whatever it contains.
 
-    Asserted as a property of the geometry rather than against specific boxes,
-    so redesigning either page's content cannot break it.
+    Every figure is derived from the document, so redesigning the notebook —
+    its margins, its grid, its page size — cannot break this test. Only the
+    mirroring actually failing can.
     """
     document = spec.load(ROOT / "templates" / "daily.yaml")
-    pages = Renderer(document).render_all()
+    renderer = Renderer(document)
+    _, front_content = renderer.content_rect(document.pages[0])
+    _, back_content = renderer.content_rect(document.pages[1])
+    pages = renderer.render_all()
     front, back = pages[0][1], pages[1][1]
 
-    # Content block: gutter on the left of a recto, on the right of a verso.
-    front_rects = [r for r in _rects(front) if close(r[2], 75.0)]
-    back_rects = [r for r in _rects(back) if close(r[2], 75.0)]
-    assert front_rects and back_rects
-    assert all(close(r[0], 25.0) for r in front_rects), "recto text block starts at the gutter"
-    assert all(close(r[0], 5.0) for r in back_rects), "verso text block starts at the outer edge"
+    # Same text block, reflected: the recto's left margin is the verso's right.
+    assert close(front_content.w, back_content.w)
+    assert close(front_content.x, document.width - back_content.right)
+    assert close(back_content.x, document.width - front_content.right)
 
-    # The binding rule mirrors with it: 20mm from the left, 20mm from the right.
-    assert '<line x1="20"' in front
-    assert '<line x1="85"' in back
-    assert 20.0 == document.width - 85.0
+    # Content block: gutter on the left of a recto, on the right of a verso.
+    width = front_content.w
+    front_rects = [r for r in _rects(front) if close(r[2], width)]
+    back_rects = [r for r in _rects(back) if close(r[2], width)]
+    assert front_rects and back_rects
+    assert all(close(r[0], front_content.x) for r in front_rects), "recto starts at the gutter"
+    assert all(close(r[0], back_content.x) for r in back_rects), "verso starts at the outer edge"
+
+    # The binding rule mirrors with it, at equal distances from opposite edges.
+    rule = re.compile(r'<line x1="([\d.]+)"')
+    front_rule = float(rule.search(front).group(1))
+    back_rule = float(rule.search(back).group(1))
+    assert close(front_rule, document.width - back_rule)
+    assert front_rule < front_content.x, "the rule sits in the binding margin"
 
 
 def test_custom_module_registers():

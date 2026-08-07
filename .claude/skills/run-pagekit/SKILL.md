@@ -1,6 +1,6 @@
 ---
 name: run-pagekit
-description: Build, run, and drive pagekit — the notebook page-template renderer that turns YAML into printable SVG/PDF. Use when asked to run pagekit or the notebook generator, render or preview a template, screenshot a page, add or test a module type, check the 2.5mm grid, or verify PDF output.
+description: Build, run, and drive pagekit — the notebook page-template renderer that turns YAML into printable SVG/PDF. Use when asked to run pagekit or the notebook generator, render or preview a template, screenshot a page, add or test a module type, check the module grid, or verify PDF output.
 ---
 
 pagekit renders YAML page definitions into print-ready SVG and PDF. It has no
@@ -120,7 +120,7 @@ SMOKE PASSED
 # → /Users/harris/Projects/Personal/notebook/out/shots/daily-01-daily-front.png
 ```
 
-Add `--debug` to overlay the 2.5mm grid and the margin box — the fastest way to
+Add `--debug` to overlay the module grid and the margin box — the fastest way to
 see *why* something sits where it does.
 
 ### Iterate on a module (the main dev loop)
@@ -191,16 +191,27 @@ the layout engine directly:
 ```
 
 ```
-daily / daily-front                  9 placements, 0 off-grid
-daily / daily-back                   1 placements, 0 off-grid
-weekly / week-plan                   7 placements, 0 off-grid
-weekly / week-notes                  4 placements, 0 off-grid
+daily / daily-front             2.0mm   9 placements, 0 off-grid
+daily / daily-back              2.0mm   2 placements, 0 off-grid
+    note: content rect is off the lattice by x+1.00mm — placements
+          checked relative to it, not to the page
+weekly / week-plan              2.0mm   7 placements, 0 off-grid
+weekly / week-notes             2.0mm   4 placements, 0 off-grid
+    note: content rect is off the lattice by x+1.00mm — placements
+          checked relative to it, not to the page
 
-29 placements checked; all on the 2.5mm grid
+30 placements checked; all on the 2.0mm grid; 2 page(s) on an off-lattice content rect
 ```
 
+The grid comes from each document's `grid.module`, not from a constant. The
+`note:` lines are expected and not failures: a 105 mm page cannot put both
+mirrored margins on a 2 mm grid, so every verso is 1 mm off the lattice by
+design. Placements are then checked against that offset, so a module that
+really drifts still fails. See "Choosing a grid your page can actually hold"
+in the README.
+
 `geom` gives rendered *ink* positions in millimetres — this is how the daily
-template was matched to the original Illustrator artwork to within 0.15mm:
+template's geometry is checked against measured artwork:
 
 ```bash
 .venv/bin/pagekit-dev geom out/daily-01-daily-front.svg --min-size 5
@@ -208,16 +219,17 @@ template was matched to the original Illustrator artwork to within 0.15mm:
 
 ```
 id                    x        y        w        h    right   bottom
-svg61              0.00     0.00   105.00   170.00   105.00   170.00
+svg435             0.00     0.00   105.00   170.00   105.00   170.00
 rect1              0.00     0.00   105.00   170.00   105.00   170.00
-line1             19.96     0.00     0.09   170.00    20.04   170.00
-rect2             24.96     2.46    75.09     5.09   100.04     7.54
-text2             27.10     4.07     7.36     1.98    34.46     6.05
+line1             11.96     0.00     0.09   170.00    12.04   170.00
+rect2             15.96     1.96    84.09     6.09   100.04     8.04
+text2             18.10     3.57     7.36     1.98    25.46     5.55
 ```
 
-Reference values from the source artwork: content block x 25→100, binding rule
-at x=20, first field row y 2.5→7.5. Bounds include the 0.0882mm stroke, hence
-24.96 rather than 25.00.
+Current reference values: content block x 16→100, binding rule at x=12, first
+field row y 2→8. Bounds include the 0.0882mm stroke, hence 15.96 rather than
+16.00. (Before the move to the 2mm grid these were x 25→100 and a rule at
+x=20, which is what the original Illustrator artwork measured.)
 
 ## Run (human path)
 
@@ -240,12 +252,14 @@ Housekeeping:
 
 ```bash
 .venv/bin/pagekit-dev test
-# → 15 "ok" lines, then: all tests passed     (~1s)
+# → 23 "ok" lines, then: all tests passed     (~1s)
 ```
 
-The suite renders in memory and writes nothing. `test_daily_matches_the_original_artwork`
-asserts real coordinates measured from the source Illustrator file — if you
-change layout maths, that is the test that will catch it.
+The suite renders in memory and writes nothing. It deliberately pins no
+template coordinates: every geometric assertion derives its figures from the
+document, so redesigning the notebook does not break the tests. Layout-maths
+regressions are caught by `test_geometry`, the `fill`/gap tests and
+`pagekit-dev grid` instead.
 
 ## Gotchas
 

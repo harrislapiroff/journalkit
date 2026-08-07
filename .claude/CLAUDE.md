@@ -25,9 +25,17 @@ for checking layout against the original artwork in millimetres.
 
 ## Invariants worth not breaking
 
-- **Module placements snap to the 2.5 mm grid.** What a module draws *inside*
-  its own rect need not. `pagekit-dev grid` asserts the former by driving the
-  layout engine; `pagekit-dev ink` reports the latter, informationally.
+- **Module placements snap to the module grid** — 2 mm in `templates/`, and
+  read per document, never assumed. What a module draws *inside* its own rect
+  need not. `pagekit-dev grid` asserts the former by driving the layout engine;
+  `pagekit-dev ink` reports the latter, informationally.
+- **A page can only hold a grid it is commensurate with.** Both grids are
+  page-anchored, and mirroring means `inner`, `outer` and the page dimension
+  must all be multiples of it. 105 mm is 42 × 2.5 but not a multiple of 2, so
+  on the 2 mm grid the daily verso is knowingly 1 mm off the lattice.
+  `pagekit-dev grid` prints that as a per-page note and then checks placements
+  *relative to* the page's offset — a module drifting off the grid still fails.
+  Don't "fix" the note by loosening the check.
 - **The dot lattice is anchored to the page**, not to the module — that is what
   makes dots line up across modules and across pages. Never phase it per module.
   Dots that would collide with a label are *dropped*, never shifted, so the
@@ -37,9 +45,12 @@ for checking layout against the original artwork in millimetres.
 - **Text is positioned from `font.cap_height`.** It assumes Montserrat. A
   missing font substitutes silently and shifts every baseline — see the Gotchas
   in the run skill, and run `pagekit-dev fonts` after any PDF build.
-- `templates/daily.yaml` reproduces the source Illustrator artwork to within
-  0.15 mm. `tests/test_pagekit.py::test_daily_matches_the_original_artwork`
-  pins those coordinates; if it fails, the layout maths changed.
+- `templates/daily.yaml` began as a 0.15 mm reproduction of the source
+  Illustrator artwork and was redrawn on the 2 mm grid; the test that pinned
+  the artwork coordinates is gone. Nothing pins the templates' exact geometry
+  now — `test_back_page_is_mirrored` and `pagekit-dev grid` derive every figure
+  from the document, so a redesign changes the output without breaking them.
+  Keep it that way: assert properties, not coordinates.
 
 - **Colour flows from one value.** `theme.ink` stands behind stroke, label,
   heading, dots and lines via `$theme.ink`; a new colour role should point at
@@ -54,4 +65,5 @@ for checking layout against the original artwork in millimetres.
   project-local file referenced by `modules:` in a document. See
   `custom/habits.py`.
 - Warnings (off-grid snapping, overflow) go to stderr with exit code 0; `--strict`
-  makes them fatal.
+  makes them fatal. Only sizes written in a template warn — a module's intrinsic
+  height is snapped silently, since no template could act on it.

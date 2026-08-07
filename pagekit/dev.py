@@ -391,13 +391,29 @@ def _walk(module, rect, depth=0):
 
 
 def cmd_grid(args) -> int:
-    """Assert the core invariant: every *module placement* is on the 2.5mm grid.
+    """Assert the core invariant: every *module placement* is on the module grid.
+
+    The grid comes from each document's own `grid.module`, not from a constant
+    here — a page on a 2mm grid must be checked against 2mm, or the check
+    quietly passes everything.
 
     This drives the layout engine directly rather than parsing the SVG, because
     the invariant is about where the engine puts modules — not about every rect
     that ends up in the file. A module is free to draw sub-grid detail inside
     its own box (habit_grid divides 50mm into 7 columns of 7.1429mm, and that
     is correct). Parsing the SVG cannot tell those two cases apart.
+
+    Two different things can be off the grid, and they are not equally bad:
+
+    * the *content rect* — page geometry the template author chose. A 105mm
+      page cannot put both mirrored margins on a 2mm grid, so daily.yaml's
+      verso sits 1mm off the lattice by design. Reported per page as a phase,
+      never fatal.
+    * a *module placement*, relative to that content rect. That is the layout
+      engine failing to snap, and it is fatal.
+
+    Checking placements against the page's own phase keeps the second check
+    meaningful on a page that has knowingly given up the first.
     """
     from pagekit import spec as pk_spec
     from pagekit.layout import layout_stack
@@ -407,9 +423,17 @@ def cmd_grid(args) -> int:
     sources = [Path(p) for p in args.svg] or sorted((ROOT / "templates").glob("*.yaml"))
     violations = 0
     checked = 0
+    skewed = 0
 
+    def phase(value, grid):
+        """How far ``value`` sits from the nearest grid line, signed."""
+        return value - round(value / grid) * grid
+
+    grids = set()
     for source in sources:
         document = pk_spec.load(source)
+        grid = document.grid
+        grids.add(grid)
         renderer = Renderer(document)
         for page_spec in document.pages:
             _, content = renderer.content_rect(page_spec)
@@ -417,24 +441,38 @@ def cmd_grid(args) -> int:
             children = [build_module(s, ctx) for s in page_spec.content]
             placements = layout_stack(children, content, ctx.default_gap, ctx.grid, ctx)
 
+            # The page's own offset from the lattice. Zero for a page whose
+            # margins are all multiples of the grid, which is the normal case.
+            offsets = {"x": phase(content.x, grid), "y": phase(content.y, grid),
+                       "w": phase(content.w, grid), "h": phase(content.h, grid)}
+            askew = {k: v for k, v in offsets.items() if abs(v) > 1e-6}
+
             offenders = []
             for placement in placements:
                 for depth, module, rect in _walk(placement.module, placement.rect):
                     checked += 1
                     for label, value in (("x", rect.x), ("y", rect.y),
                                          ("w", rect.w), ("h", rect.h)):
-                        if abs(value - round(value / GRID) * GRID) > 1e-6:
+                        if abs(phase(value, grid) - offsets[label]) > 1e-6:
                             offenders.append((depth, module.name, label, value, rect))
                             break
             label = "%s / %s" % (source.stem, page_spec.name)
-            print("%-34s %3d placements, %d off-grid" % (label, len(placements), len(offenders)))
+            print("%-30s %4.1fmm %3d placements, %d off-grid"
+                  % (label, grid, len(placements), len(offenders)))
+            if askew:
+                skewed += 1
+                print("    note: content rect is off the lattice by %s — placements"
+                      % ", ".join("%s%+.2fmm" % (k, v) for k, v in sorted(askew.items())))
+                print("          checked relative to it, not to the page")
             for depth, name, key, value, rect in offenders[:10]:
                 print("    %s%s: %s=%.4f  %s" % ("  " * depth, name, key, value, rect))
             violations += len(offenders)
 
-    print("\n%d placements checked; %s"
-          % (checked, "all on the %.1fmm grid" % GRID if not violations
-             else "%d off-grid" % violations))
+    on = "/".join("%.1f" % g for g in sorted(grids))
+    summary = "all on the %smm grid" % on if not violations else "%d off-grid" % violations
+    if skewed:
+        summary += "; %d page(s) on an off-lattice content rect" % skewed
+    print("\n%d placements checked; %s" % (checked, summary))
     return 1 if violations else 0
 
 

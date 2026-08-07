@@ -1,4 +1,5 @@
-# Daily journal spread — a reproduction of the original Illustrator design.
+# Daily journal spread. Started as a reproduction of the original Illustrator
+# design (25mm gutter, 2.5/5mm grids) and was redrawn on a 2/4mm grid.
 #
 #   ../.venv/bin/python -m pagekit build templates/daily.yaml --pdf
 #
@@ -8,25 +9,27 @@ document: daily
 
 page:
   size: [105, 170]
+  # Every margin is an even number: the module grid is 2mm and is anchored to
+  # the page, so an odd margin would put the whole text block off-grid.
   margins:
-    top: 2.5
-    bottom: 7.5
-    inner: 25      # binding side — wide, so the text block clears the stitching
-    outer: 5
+    top: 2
+    bottom: 8
+    inner: 16      # binding side — enough to clear the stitching
+    outer: 5       # odd, so that 105 - 16 - 5 = 84 is even
 
 grid:
-  module: 2.5      # every module snaps to this
+  module: 2        # every module snaps to this
   dots:
-    spacing: 5
-    origin: [0, 2.5]   # page-anchored, so dots line up across modules
+    spacing: 4
+    origin: [0, 2]     # page-anchored, so dots line up across modules
     radius: 0.125
 
 defaults:
-  gap: 2.5         # default vertical gap between modules
+  gap: 2           # default vertical gap between modules
 
 theme:
   ink: "#000"            # one colour for strokes, text and dots
-  stroke_width: 0.125pt
+  stroke_width: 0.25pt
   font:
     family: Montserrat
   label:
@@ -42,7 +45,7 @@ theme:
 decorations:
   - type: rule
     edge: inner
-    offset: 5
+    offset: 4        # even, so the rule sits on the 2mm grid like everything else
 
 templates:
 
@@ -50,13 +53,13 @@ templates:
     side: right
     content:
       - type: fields
-        height: 5
+        height: 6
         columns: [DATE, "LOC."]
 
       - type: heading
         text: MORNING
         icon: sunrise
-        gap: 2.5
+        gap: 2
 
       - type: rating
         label: MOOD
@@ -66,18 +69,18 @@ templates:
 
       - type: box
         label: NOTES/REFLECTION
-        height: 22.5
+        height: fill
         dots: true
 
       - type: checklist
-        rows: 5
-        row_height: 5
-        row_gap: 2.5
+        rows: 3
+        row_height: 4
+        row_gap: 2
 
       - type: heading
         text: EVENING
         icon: moon
-        gap: 5
+        gap: 4
 
       - type: rating
         label: MOOD
@@ -92,7 +95,7 @@ templates:
 
       - type: box
         label: GRATITUDE
-        height: 20
+        height: 26
         dots: true
 
   daily-back:
@@ -105,8 +108,8 @@ templates:
 
       - type: checklist
         rows: 8
-        row_height: 5
-        row_gap: 2.5
+        row_height: 4
+        row_gap: 2
 
 
 pages:
