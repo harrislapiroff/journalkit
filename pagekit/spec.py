@@ -144,7 +144,13 @@ def _load_extra_modules(paths, base: Path) -> None:
 
 def load(path: str | Path) -> Document:
     path = Path(path).resolve()
-    data = yaml.safe_load(path.read_text()) or {}
+    try:
+        data = yaml.safe_load(path.read_text()) or {}
+    except yaml.YAMLError as exc:
+        # A syntax error in a hand-written template is a user error, not a
+        # pagekit bug — report it like one instead of a traceback. This is the
+        # common case under `pagekit-dev watch`, which rebuilds mid-edit.
+        raise ValueError("%s: %s" % (path.name, exc)) from None
     base = path.parent
 
     _load_extra_modules(data.get("modules"), base)
