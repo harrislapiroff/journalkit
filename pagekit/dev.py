@@ -4,7 +4,7 @@
 pagekit has no GUI and no server — its "running app" is a set of print
 artifacts. So driving it means three things, and this script does all three:
 
-    render   turn YAML into SVG/PDF/PNG
+    render   turn YAML into SVG/PDF/PNG — once, or on every change (`watch`)
     look     rasterise a page so an agent can Read() the image
     verify   assert the invariants that make the output correct
 
@@ -182,6 +182,109 @@ def cmd_build(args) -> int:
             print(result.stderr.rstrip())
         failed += result.returncode != 0
     return 1 if failed else 0
+
+
+# ---------------------------------------------------------------- watch
+# Everything a build reads. Templates are the obvious input, but a layout
+# change in the library or a re-extracted icon changes the output just as
+# much, so all of it is watched.
+WATCH_GLOBS = ("templates/*.yaml", "custom/*.py", "icons/*.svg",
+               "pagekit/*.py", "pagekit/modules/*.py")
+SETTLE = 0.3    # quiet period before building, so one save is one build
+
+
+def _stamps(extra=()):
+    """{path: mtime} for every watched file, re-globbed so new files appear."""
+    paths = set(extra)
+    for pattern in WATCH_GLOBS:
+        paths.update(ROOT.glob(pattern))
+    found = {}
+    for path in paths:
+        try:
+            found[path] = path.stat().st_mtime
+        except OSError:
+            pass  # deleted mid-scan; the next poll reports it as a change
+    return found
+
+
+def cmd_watch(args) -> int:
+    """Rebuild whenever an input file changes, until interrupted.
+
+    Polls mtimes rather than using an OS watch API: the file count here is in
+    the dozens, and polling keeps the harness on the standard library.
+
+    Editing a template rebuilds only that template; touching the library,
+    icons or a custom module rebuilds everything, because any of those can
+    change every page.
+    """
+    import time
+
+    # Flush every line: the watcher is long-lived, and its stdout is often a
+    # pipe (an agent tailing a log), where print would otherwise block-buffer
+    # and show nothing until it exits.
+    def say(text=""):
+        print(text, flush=True)
+
+    pdf, png = not args.no_pdf, args.png
+    what = "svg" + (" + pdf" if pdf else "") + (" + png" if png else "")
+    targets = _templates(args)
+    watched = dict.fromkeys(g.split("/")[0] for g in WATCH_GLOBS)
+    say("watching %s for changes → %s (%s)"
+        % (", ".join(watched), what, OUT))
+    say("ctrl-c to stop\n")
+
+    def build(templates):
+        for template in templates:
+            started = time.monotonic()
+            result = _build(template, OUT, pdf=pdf, png=png, dpi=args.dpi,
+                            debug=args.debug)
+            written = sum(line.startswith("wrote")
+                          for line in result.stdout.splitlines())
+            say("  %-18s %-7s %d file(s)  %4.1fs"
+                % (template.name, "ok" if result.returncode == 0 else "FAILED",
+                   written, time.monotonic() - started))
+            # Warnings (off-grid snapping, overflow) come back on stderr with
+            # exit code 0 — surfacing them is most of the point of watching.
+            for line in result.stderr.splitlines():
+                if line.strip():
+                    say("      %s" % line)
+
+    seen = _stamps(targets)
+    say("[%s] initial build" % time.strftime("%H:%M:%S"))
+    build(targets)
+
+    try:
+        while True:
+            time.sleep(args.interval)
+            now = _stamps(targets)
+            changed = sorted(p for p in set(seen) | set(now)
+                             if seen.get(p) != now.get(p))
+            if not changed:
+                continue
+
+            # Let a burst of writes settle, so saving several files at once —
+            # or an editor's write-temp-then-rename — is a single rebuild.
+            while True:
+                time.sleep(SETTLE)
+                settled = _stamps(targets)
+                if settled == now:
+                    break
+                changed = sorted(set(changed) | {p for p in set(now) | set(settled)
+                                                 if now.get(p) != settled.get(p)})
+                now = settled
+            seen = now
+
+            targets = _templates(args)
+            touched = [t for t in targets if t in changed]
+            rebuild = touched if len(touched) == len(changed) else targets
+
+            say("\n[%s] %s" % (time.strftime("%H:%M:%S"),
+                               ", ".join(p.name for p in changed[:4])
+                               + (" +%d more" % (len(changed) - 4) if len(changed) > 4 else "")))
+            build(rebuild)
+    except KeyboardInterrupt:
+        say("\nstopped")
+        return 0
 
 
 def cmd_shot(args) -> int:
@@ -506,6 +609,15 @@ def main(argv=None) -> int:
     p.add_argument("--dpi", type=int, default=150)
     p.add_argument("--debug", action="store_true", help="overlay grid + margin box")
     p.set_defaults(func=cmd_build)
+
+    p = sub.add_parser("watch", help="rebuild on every change until interrupted")
+    p.add_argument("template", nargs="*", help="default: every templates/*.yaml")
+    p.add_argument("--no-pdf", action="store_true", help="SVG only — much faster")
+    p.add_argument("--png", action="store_true", help="also rasterise a preview PNG")
+    p.add_argument("--dpi", type=int, default=150)
+    p.add_argument("--debug", action="store_true", help="overlay grid + margin box")
+    p.add_argument("--interval", type=float, default=0.4, help="poll seconds (default 0.4)")
+    p.set_defaults(func=cmd_watch)
 
     p = sub.add_parser("shot", help="render a template and print PNG paths to Read()")
     p.add_argument("template")

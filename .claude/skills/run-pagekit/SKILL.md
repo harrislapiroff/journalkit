@@ -82,9 +82,10 @@ Everything goes through the driver. Run it from the project root:
 | `doctor` | check tools, venv, font; non-zero if anything is missing |
 | `smoke` | **everything end to end** — build, tests, grid, fonts, PDF size |
 | `build [tmpl…] [--pdf] [--png] [--dpi N] [--debug]` | render; default is every `templates/*.yaml` |
+| `watch [tmpl…] [--no-pdf] [--png] [--debug]` | rebuild SVG+PDF on every change; runs until interrupted |
 | `shot <tmpl> [--page N] [--dpi N] [--debug]` | render + rasterise, prints PNG paths to `Read()` |
 | `preview [--modules F] [--debug]` | render ad-hoc module YAML **from stdin** |
-| `grid [tmpl…]` | assert every module placement is on the 2.5mm grid |
+| `grid [tmpl…]` | assert every module placement is on the document's module grid |
 | `ink [svg…]` | report sub-grid geometry *inside* modules (informational) |
 | `geom <svg> [--min-size N]` | rendered ink geometry in mm, via Inkscape |
 | `fonts [pdf…]` | assert PDFs embed Montserrat, not a substitute |
@@ -146,6 +147,39 @@ project root):
 echo '- {type: habit_grid, headers: [M,T,W,T,F,S,S], habits: [MOVE, READ]}' \
   | .venv/bin/pagekit-dev preview --modules custom/habits.py
 ```
+
+### Keep the artifacts fresh while editing
+
+`watch` is the one long-running command here — it polls its inputs and rebuilds
+until interrupted. Run it **in the background** and read its output; never in
+the foreground, where it will block the session forever.
+
+```bash
+.venv/bin/pagekit-dev watch --no-pdf     # SVG only while iterating
+.venv/bin/pagekit-dev watch              # SVG + PDF, the real document
+```
+
+```
+watching templates, custom, icons, pagekit for changes → svg (out)
+ctrl-c to stop
+
+[18:17:35] initial build
+  daily.yaml         ok      2 file(s)   0.2s
+  weekly.yaml        ok      2 file(s)   0.1s
+
+[18:17:41] daily.yaml
+  daily.yaml         ok      2 file(s)   0.1s
+      warning: daily-front: box: height 25.000mm is off the 2.000mm grid, snapped to 26.000mm
+```
+
+It watches `templates/`, `pagekit/`, `icons/` and `custom/`. A template edit
+rebuilds that template; anything else rebuilds all of them. Warnings appear
+indented under the file that caused them, and a build failure (bad YAML, say)
+is printed without stopping the watcher. Output is line-flushed, so tailing a
+redirected log works.
+
+For a one-shot check prefer `build` — `watch` is for a human editing YAML, not
+for verifying a change you just made.
 
 ### Verify a layout change numerically
 

@@ -33,7 +33,7 @@ Either way you get PyYAML and two console scripts in `.venv/bin/`:
 | script | purpose |
 |---|---|
 | `pagekit` | the renderer — `build`, `modules` |
-| `pagekit-dev` | dev tasks — `doctor`, `smoke`, `test`, `clean`, `preview`, `grid`, `geom`, `fonts` |
+| `pagekit-dev` | dev tasks — `doctor`, `smoke`, `test`, `clean`, `watch`, `preview`, `grid`, `geom`, `fonts` |
 
 Check your machine has everything (works before the venv exists):
 
@@ -60,6 +60,41 @@ pagekit-dev test       # the test suite
 pagekit-dev grid       # assert every module placement is on the 2.5mm grid
 pagekit-dev clean      # delete out/
 ```
+
+## Watching
+
+`pagekit-dev watch` rebuilds SVG **and** PDF every time an input changes, and
+keeps going until you interrupt it:
+
+```sh
+pagekit-dev watch                       # every templates/*.yaml → out/
+pagekit-dev watch templates/daily.yaml  # just one
+pagekit-dev watch --no-pdf              # SVG only, ~10x faster
+pagekit-dev watch --png --debug         # + preview PNGs with the grid overlay
+```
+
+```
+watching templates, custom, icons, pagekit for changes → svg + pdf (out)
+ctrl-c to stop
+
+[18:19:58] initial build
+  daily.yaml         ok      3 file(s)   1.4s
+
+[18:20:11] daily.yaml
+  daily.yaml         ok      3 file(s)   1.3s
+      warning: daily-back: checklist: height 46.000mm snapped to 45.000mm
+```
+
+Templates are not the only input: the watcher also follows `pagekit/`,
+`icons/` and `custom/`, since a layout change or a re-extracted icon changes
+the output just as much. Editing a template rebuilds only that template;
+touching anything else rebuilds them all.
+
+Warnings are printed under the file that produced them — a build that "succeeds"
+while snapping a module to the grid is exactly what you want to see immediately.
+A broken template prints the error and the watcher keeps running, so fixing the
+YAML rebuilds it. PDF export runs Inkscape per page, so pass `--no-pdf` while
+iterating on layout and drop it when you want the real document.
 
 `pagekit-dev preview` renders ad-hoc module YAML from stdin — the fastest way
 to iterate on a module without writing a template file:
