@@ -22,7 +22,7 @@ defaults:
 
 theme:
   font: {family: Montserrat}
-  label: {size: 8pt, weight: 500}
+  label: {size: 8pt, weight: 500, dy: 4}   # centres the cap in a 6mm row
   heading: {size: 12pt, weight: 700}
 
 decorations:

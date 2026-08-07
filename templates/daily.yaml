@@ -35,6 +35,9 @@ theme:
   label:
     size: 8pt
     weight: 500
+    dy: 4          # baseline below the module's top edge. The 3.55 default
+                   # optically centres an 8pt cap in a 5mm row; rows are 6mm
+                   # on this grid, so (6 + 1.976) / 2 ≈ 4 centres it again.
   heading:
     size: 12pt
     weight: 700
