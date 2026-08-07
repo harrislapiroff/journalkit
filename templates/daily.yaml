@@ -57,7 +57,14 @@ templates:
     content:
       - type: fields
         height: 6
-        columns: [DATE, "LOC."]
+        columns:
+          - {label: DATE, width: 28}   # a third of the 84mm block
+          - {label: "LOC."}            # takes the remaining 56mm
+
+      # Blank line for the day's theme or title — "First day in Spain!".
+      # Unlabelled on purpose: it is one writing line, matching the row above.
+      - type: box
+        height: 6
 
       - type: heading
         text: MORNING
