@@ -269,35 +269,11 @@ class Checklist(_Framed):
         rows, row_height, row_gap = self._metrics()
         return rows * row_height + max(rows - 1, 0) * row_gap
 
-    def _draw_marker(self, canvas, box):
-        marker = self.opt("marker", self.theme.get("checklist.marker"))
-        if not marker or marker == "none":
-            return
-        colour = self.stroke
-        width = self.stroke_width
-        if isinstance(marker, str) and marker.startswith("icon:"):
-            icon = self.ctx.icons.get(marker[5:])
-            icon.place(canvas, box, colour=colour, align="center", valign="middle")
-            return
-        knockout = self.opt("marker_fill", self.theme.get("checklist.marker_fill"))
-        size = min(box.w, box.h)
-        cx, cy = box.cx, box.cy
-        if marker == "square":
-            canvas.rect(cx - size / 2, cy - size / 2, size, size,
-                        fill=knockout, stroke=colour, stroke_width=width)
-            return
-        canvas.circle(cx, cy, size / 2, fill=knockout, stroke=colour, stroke_width=width)
-        if marker == "circle-slash":
-            # The slash is a full diameter at 45 degrees, low-left to top-right.
-            offset = size / 2 / (2 ** 0.5)
-            canvas.line(cx - offset, cy + offset, cx + offset, cy - offset,
-                        stroke=colour, stroke_width=width)
-
     def draw(self, canvas, rect):
         rows, row_height, row_gap = self._metrics()
-        marker = self.opt("marker", self.theme.get("checklist.marker"))
+        marker = self.opt("marker", self.theme.get("marker.shape"))
         has_marker = bool(marker) and marker != "none"
-        marker_size = self.length("marker_size") or self.theme.mm("checklist.marker_size")
+        marker_size = self.length("marker_size") or self.theme.mm("marker.size")
         marker_gap = self.length("marker_gap") or self.theme.mm("checklist.marker_gap")
         if not has_marker:
             marker_size = marker_gap = 0.0
@@ -307,7 +283,7 @@ class Checklist(_Framed):
         for index in range(rows):
             row = Rect(rect.x, y, rect.w, row_height)
             if has_marker:
-                self._draw_marker(canvas, Rect(row.x, row.y, marker_size, row.h))
+                self.draw_marker(canvas, Rect(row.x, row.y, marker_size, row.h), marker)
             box = Rect(row.x + marker_size + marker_gap, row.y,
                        row.w - marker_size - marker_gap, row.h)
             self.frame(canvas, box)

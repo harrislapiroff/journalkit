@@ -60,11 +60,16 @@ DEFAULT_THEME = {
         "reserve_label": "band",
         "label_pad": 0.75,
     },
+    # The checkbox, shared by every module that draws one — the daily's
+    # checklist and the weekly's habit grid tick the same shape.
+    "marker": {
+        "shape": "circle-slash",   # circle-slash | circle | square | none | icon:<name>
+        "size": 5.0,
+        # A knockout, so it masks whatever is under it: not themed on purpose.
+        "fill": "#ffffff",
+    },
     "checklist": {
-        "marker": "circle-slash",
-        "marker_size": 5.0,
         "marker_gap": 2.5,
-        "marker_fill": "#ffffff",
     },
     "rating": {
         "icon_size": 3.0,

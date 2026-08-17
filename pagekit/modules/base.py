@@ -201,6 +201,39 @@ class Module:
             style="label",
         )
 
+    def draw_marker(self, canvas, box, marker=None):
+        """Draw a checkbox marker centred in ``box``, at ``theme.marker.shape``.
+
+        The shape is one of ``circle-slash``, ``circle``, ``square``, ``none``
+        or ``icon:<name>``; its diameter is whichever of ``box``'s sides is
+        shorter, so the caller sizes it by handing over the right rect.  The
+        fill is a knockout rather than the page colour, so a marker sitting on
+        a rule or the dot lattice masks it.
+        """
+        if marker is None:
+            marker = self.opt("marker", self.theme.get("marker.shape"))
+        if not marker or marker == "none":
+            return
+        colour = self.stroke
+        width = self.stroke_width
+        if isinstance(marker, str) and marker.startswith("icon:"):
+            icon = self.ctx.icons.get(marker[5:])
+            icon.place(canvas, box, colour=colour, align="center", valign="middle")
+            return
+        knockout = self.opt("marker_fill", self.theme.get("marker.fill"))
+        size = min(box.w, box.h)
+        cx, cy = box.cx, box.cy
+        if marker == "square":
+            canvas.rect(cx - size / 2, cy - size / 2, size, size,
+                        fill=knockout, stroke=colour, stroke_width=width)
+            return
+        canvas.circle(cx, cy, size / 2, fill=knockout, stroke=colour, stroke_width=width)
+        if marker == "circle-slash":
+            # The slash is a full diameter at 45 degrees, low-left to top-right.
+            offset = size / 2 / (2 ** 0.5)
+            canvas.line(cx - offset, cy + offset, cx + offset, cy - offset,
+                        stroke=colour, stroke_width=width)
+
     def label_band(self, rect, text=None):
         """The area a top-left label occupies, for dots to keep clear of.
 

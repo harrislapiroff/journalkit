@@ -37,12 +37,10 @@ templates:
     content:
       - type: fields
         columns:
-          - {label: WEEK, width: 24}
-          - {label: FROM}
-          - {label: TO}
+          - {label: WEEK OF}
 
       - type: heading
-        text: FOCUS
+        text: Themes
         gap: 2
 
       - type: box
@@ -54,7 +52,7 @@ templates:
 
       - type: habit_grid
         headers: [M, T, W, T, F, S, S]
-        habits: [MOVE, READ, WATER, SLEEP]
+        habits: [Fill move ring, Read 5 pages, "", "", ""]
         label_width: 24
         row_height: 4
 
@@ -84,16 +82,15 @@ templates:
     side: left
     content:
       - type: heading
-        text: NOTES
+        text: WEEKLONG TASKS
 
-      - type: lines
-        height: 60
-        spacing: 4
-        border: true
-        label: LOG
+      - type: checklist
+        rows: 8
+        row_height: 4
+        row_gap: 2
 
-      - type: rule
-        gap: 2
+      - type: heading
+        text: WEEK NOTES
 
       - type: dotfield
         height: fill

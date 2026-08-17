@@ -382,6 +382,7 @@ modules: [../custom/habits.py]
 Helpers available on `Module`: `self.opt(key, default)` (resolves
 `$theme.` references), `self.length(key)`, `self.stroke`, `self.stroke_width`,
 `self.text(...)`, `self.draw_label(...)`, `self.draw_dots(...)`,
+`self.draw_marker(...)` (the checkbox, centred in the rect you hand it),
 `self.cap_height()`, and `self.ctx` for the theme, icon set, page/content rects
 and the dot lattice. `custom/habits.py` is a worked example.
 
