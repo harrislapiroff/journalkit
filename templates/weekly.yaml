@@ -40,7 +40,7 @@ templates:
           - {label: WEEK OF}
 
       - type: heading
-        text: Themes
+        text: WEEK THEME(S)
         gap: 2
 
       - type: box
@@ -53,17 +53,17 @@ templates:
       - type: habit_grid
         headers: [M, T, W, T, F, S, S]
         habits: [Fill move ring, Read 5 pages, "", "", ""]
-        label_width: 24
+        # 42mm of gutter leaves 6mm columns for the seven days, so the marker
+        # lattice is as tight horizontally as the 4mm row + 2mm gap makes it
+        # vertically — and the write-your-own rules get the width back.
+        label_width: 42
         row_height: 4
-
-      - type: heading
-        text: WEEK
-        gap: 4
 
       # Two half-width columns of day boxes.
       - type: row
         height: fill
         gap_between: 2
+        gap: 8
         content:
           - type: stack
             gap_between: 2
@@ -89,11 +89,10 @@ templates:
         row_height: 4
         row_gap: 2
 
-      - type: heading
-        text: WEEK NOTES
-
-      - type: dotfield
+      - type: box
+        label: WEEK NOTES
         height: fill
+        dots: true
 
 pages:
   - template: week-plan

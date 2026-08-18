@@ -356,7 +356,16 @@ def test_custom_module_registers():
     assert "habit_grid" in REGISTRY
     pages = Renderer(document).render_all()
     assert len(pages) == 2
-    assert "MOVE" in pages[0][1]
+
+    # Whatever the template calls its habits, the grid draws the named ones.
+    # Derived from the document, so renaming a habit is not a test failure.
+    grids = [m for page in document.pages for m in page.content
+             if isinstance(m, dict) and m.get("type") == "habit_grid"]
+    assert grids, "weekly.yaml no longer exercises the custom module"
+    named = [h for h in grids[0].get("habits", []) if h]
+    assert named, "the habit grid has no named rows to check"
+    for habit in named:
+        assert habit in pages[0][1]
 
 
 def test_repeat_expands_pages(tmp_path=None):
