@@ -108,6 +108,13 @@ templates:
         height: 26
         dots: true
 
+      # Footer nudge to keep the weekly spread in sync with the dailies.
+      - type: text
+        text: "Don't forget to update the weekly page!"
+        align: center
+        size: 6pt
+        weight: 500
+
   daily-back:
     side: left
     content:
