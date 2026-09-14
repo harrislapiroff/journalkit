@@ -20,7 +20,12 @@ DEFAULT_THEME = {
     "stroke_width": "0.25pt",
     "fill": "none",
     "font": {
+        # Montserrat Regular/Medium/Bold ship with journalkit; any other
+        # family must be installed on the machine doing the build.
         "family": "Montserrat",
+        # Draw text as glyph outlines read from the font file, so the output
+        # depends on no installed font.  False emits SVG <text> instead.
+        "outline": True,
         # Fraction of the em occupied by capitals, used to place baselines
         # from a box edge or centre.  Left null, it is read from the font's
         # OS/2 table (Montserrat publishes 0.700); set it to override.

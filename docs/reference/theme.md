@@ -12,7 +12,8 @@ stroke_width: 0.25pt
 fill: none
 
 font:
-  family: Montserrat
+  family: Montserrat           # Regular, Medium and Bold are bundled
+  outline: true                # draw glyph outlines; false emits SVG <text>
   cap_height: null             # fraction of the em; null = read the font's OS/2 table
   avg_advance: 0.75            # em per character, used only when the font file can't be read
 
@@ -65,10 +66,14 @@ lines:
 document; set an individual role to pin just that role. You may add your own
 keys (`accent: "#c00"`) and point roles at them.
 
-**`font.family`** must be installed system-wide. journalkit reads metrics
-from the font file to place baselines and measure labels; Inkscape embeds it
-in the PDF. `journalkit doctor` checks it, `journalkit check` verifies the
-result.
+**`font.family`** — Montserrat is bundled; any other family must be
+installed on the machine that builds. journalkit reads the font file for
+metrics and glyph outlines. `journalkit doctor` reports what it found.
+
+**`font.outline`** — `true` draws every glyph as an SVG path, so the output
+depends on no installed font. `false` emits `<text>` and leaves the font to
+Inkscape. Fonts without TrueType outlines (CFF) fall back to `<text>`
+regardless.
 
 **`font.cap_height`** — `null` means read the true value from the font. If
 the font publishes none, the fallback is 0.7. Set a number to override for

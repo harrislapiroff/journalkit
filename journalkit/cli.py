@@ -162,7 +162,8 @@ def cmd_check(args) -> int:
     for project, template in pairs:
         document = spec.load(template, project)
         out_dir = Path(args.out) if args.out else project.out_dir
-        fonts.append((out_dir / ("%s.pdf" % document.name), document.theme.get("font.family")))
+        fonts.append((out_dir / ("%s.pdf" % document.name), document.theme.get("font.family"),
+                      bool(document.theme.get("font.outline", True))))
     substituted = check_fonts(fonts)
 
     return 1 if violations or substituted else 0
@@ -197,16 +198,19 @@ def cmd_modules(args) -> int:
 
 
 # ---------------------------------------------------------------- doctor
-def _font_installed(family: str) -> bool:
-    from .fontmetrics import find_font
+def _font_status(family: str) -> tuple[bool, str]:
+    """(usable, description) for a font family the project's templates name."""
+    from .fontmetrics import BUNDLED_FONTS, load
 
-    if find_font(family) is not None:
-        return True
-    fc = shutil.which("fc-list")
-    if fc:
-        listed = subprocess.run([fc, "-f", "%{family}\n"], capture_output=True, text=True).stdout
-        return family.lower() in listed.lower()
-    return False
+    metrics = load(family)
+    if metrics is None:
+        return False, ("%s NOT found — install it, or set theme.font.family to "
+                       "Montserrat, which ships with journalkit" % family)
+    where = "bundled with journalkit" if BUNDLED_FONTS in metrics.path.parents else str(metrics.path)
+    if metrics.has_outlines:
+        return True, "%s (%s) — text will be outlined, nothing to install" % (family, where)
+    return True, ("%s (%s) — no TrueType outlines, so text is set by Inkscape: "
+                  "keep the font installed on the machine that builds the PDF" % (family, where))
 
 
 def cmd_doctor(args) -> int:
@@ -234,12 +238,11 @@ def cmd_doctor(args) -> int:
 
     print("fonts:")
     for family in sorted(project.font_families()):
-        if _font_installed(family):
-            ok("%s installed" % family)
+        usable, note = _font_status(family)
+        if usable:
+            ok(note)
         else:
-            # The font is the silent killer: Inkscape substitutes without warning.
-            bad("%s NOT installed — Inkscape will silently substitute another font "
-                "and every baseline will shift" % family)
+            bad(note)
             problems.append("font:%s" % family)
 
     print("project:")

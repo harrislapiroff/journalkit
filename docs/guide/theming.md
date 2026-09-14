@@ -1,36 +1,35 @@
 # Theming
 
-A theme is a nested mapping deep-merged over the defaults. Set it once for
-the document, override it on a page, or override it on a single module.
+A theme is a nested mapping merged over the defaults, at the document, page
+or module level:
 
 ```yaml
 theme:                        # document-wide
   ink: "#000"
-  font: {family: Montserrat}
 
 templates:
   front:
-    theme: {label: {size: 7pt}}          # this page only
+    theme: {label: {size: 7pt}}          # this page
     content:
       - type: box
         label: NOTES
-        theme: {dots: {reserve_label: text}}   # this module only
+        theme: {dots: {reserve_label: text}}   # this module
 ```
 
-The full list of keys and defaults is in the [theme reference](../reference/theme.md).
+The [theme reference](../reference/theme.md) lists every key and default.
 
-## One colour
+## Colour
 
-Every colour role — strokes, label and heading text, dots, ruled lines —
-defaults to `$theme.ink`. Recolour the whole document by setting `ink`:
+Every colour role defaults to `$theme.ink`, so one value recolours the
+document:
 
 ```yaml
 theme:
   ink: "#1a1a2e"
 ```
 
-Pin any single role without disturbing the others. Softening the dot grid
-relative to the text is the usual case:
+Pin a single role to change just that one; softening the dots is the usual
+case:
 
 ```yaml
 theme:
@@ -38,87 +37,70 @@ theme:
   dots: {colour: "#999"}
 ```
 
-Values can point at other values with `$theme.<path>`, and chains resolve. A
-module option can point at the theme too: `stroke: $theme.dots.colour`.
+Any value can point at another with `$theme.<path>`, including a module
+option: `stroke: $theme.dots.colour`.
 
-```yaml
-theme:
-  accent: "#c8102e"
-  heading: {colour: $theme.accent}
-```
-
-The default `ink` is `#231F20`, a rich black that prints a little softer than
-`#000`. The page background and the white fill behind a checklist marker are
-knockouts and deliberately not themed.
+The default `ink`, `#231F20`, prints a little softer than `#000`. The page
+background and the white behind a checklist marker are knockouts and stay
+white.
 
 ## Fonts
+
+Text is drawn as glyph outlines read from the font file, so nothing needs
+to be installed for the default. Montserrat Regular, Medium and Bold ship
+with journalkit (SIL Open Font License), and the default theme uses weights
+500 and 700.
+
+To use another font, name it and have it installed on the machine that
+builds:
 
 ```yaml
 theme:
   font:
-    family: Montserrat
+    family: Source Sans 3
 ```
 
-The font must be installed system-wide for two reasons: Inkscape embeds it in
-the PDF, and journalkit reads its metrics from the font file to place
-baselines and measure labels. If the file cannot be found, baselines fall
-back to a cap-height ratio of 0.7 and label widths to a per-character
-estimate. Read [fonts and baselines](../explanation/fonts.md) for what goes
-wrong when the font is missing at PDF time, and run `journalkit doctor` to
-confirm it is installed.
+journalkit finds the file in the usual font directories and outlines from
+it the same way. `journalkit doctor` reports whether each family a project
+uses was found. Two caveats:
 
-`cap_height` is read from the font's `OS/2` table by default. Set it to a
-fraction of the em to override — for a font that publishes no cap height, or
-to nudge every baseline at once.
+- Only TrueType outlines (`glyf`) are read. For a CFF-flavoured OpenType
+  font, journalkit still reads the metrics but emits SVG `<text>`, and
+  Inkscape then needs the font installed to make the PDF.
+- Kerning is not applied. On short capital labels this is hard to see; on a
+  long line of mixed-case text you may notice it.
+
+`font.outline: false` emits `<text>` for every font, if you want editable
+text in the SVG. `font.cap_height` overrides the cap height read from the
+font, as a fraction of the em.
 
 ## Text styles
 
-Two styles: `label` (small text inside modules) and `heading`. Each has
-`size`, `weight`, `colour` and `tracking`. Lengths take units:
+`label` (small text inside modules) and `heading`, each with `size`,
+`weight`, `colour`, `tracking`:
 
 ```yaml
 theme:
   label:   {size: 8pt,  weight: 500}
-  heading: {size: 12pt, weight: 700, tracking: 0.1}
+  heading: {size: 12pt, weight: 700}
 ```
 
-A label's baseline is `label.dy` below the module's top edge and its anchor
-`label.dx` in from the left. The defaults centre an 8 pt cap in a 5 mm row;
-if your rows are 6 mm, raise `dy` so the label recentres:
+A label's baseline is `label.dy` below the module's top edge. The default
+centres an 8 pt capital in a 5 mm row; for 6 mm rows, `dy: 4`.
+
+## Strokes, dots, markers
 
 ```yaml
 theme:
-  label: {dy: 4}
-```
-
-## Strokes and dots
-
-```yaml
-theme:
-  stroke_width: 0.25pt      # every hairline
+  stroke_width: 0.25pt
   dots:
     radius: 0.125
-    opacity: 1.0
-    reserve_label: band     # band | text | none — see below
-    label_pad: 0.75
-```
-
-`reserve_label` decides what happens where dots would collide with a
-module's label: `band` clears the label's whole line, `text` clears only
-the label's measured width so dots continue to its right, `none` lets dots
-run underneath. Dots are dropped, never shifted, so the survivors stay on
-the lattice — see [dots and labels](../explanation/dots-and-labels.md).
-
-## Markers
-
-The checkbox drawn by `checklist` and `habit_grid`:
-
-```yaml
-theme:
+    reserve_label: band     # band | text | none
   marker:
     shape: circle-slash     # circle-slash | circle | square | none | icon:<name>
     size: 5
 ```
 
-`icon:<name>` uses an icon from your `icons/` or the built-in set as the
-marker.
+`reserve_label` decides what happens where dots would fall under a label:
+`band` clears the label's whole line, `text` clears only the label's width,
+`none` leaves them. See [dots and labels](../explanation/dots-and-labels.md).

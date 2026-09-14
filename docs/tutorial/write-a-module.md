@@ -1,14 +1,13 @@
 # Write a module
 
-The built-in modules cover the common furniture of a journal page. When you
-want something they do not draw, a module is one Python class in your
-project's `modules/` directory. This walk-through writes a **timeline**: a
-vertical rule with hour marks down the left of a box, for a day plan.
+When the built-in modules don't draw what you want, a module is one Python
+class in your project's `modules/` directory. This page writes a
+**timeline**: hour marks down a vertical rule, with writing space beside
+them.
 
 ## The shape of a module
 
-Open `modules/stamp.py`, which `journalkit init` wrote for you. Stripped of
-comments it is:
+`modules/stamp.py`, which `journalkit init` wrote, is the whole pattern:
 
 ```python
 from journalkit.modules import Module, register
@@ -30,19 +29,15 @@ class Stamp(Module):
         self.draw_dots(canvas, rect)
 ```
 
-Four parts:
-
 - `@register("stamp")` makes `type: stamp` available in YAML. Every `.py` in
-  `modules/` is imported before a build, so nothing else is needed.
-- `params` documents the options for `journalkit modules`. It is
-  documentation only.
-- `natural_height` is the module's intrinsic height in millimetres when the
-  template gives none. Return `None` to mean "no opinion", which makes the
-  module behave as `fill`.
-- `draw` receives a `Canvas` and a `Rect` that is already snapped to the grid.
-  Everything you draw is in page millimetres.
+  `modules/` is imported before a build.
+- `params` is documentation for `journalkit modules`.
+- `natural_height` is the height used when the template gives none. Return
+  `None` for "no opinion", which behaves like `fill`.
+- `draw` gets a `Canvas` and a `Rect`, already snapped to the grid, in page
+  millimetres.
 
-## Write the timeline
+## The timeline
 
 Create `modules/timeline.py`:
 
@@ -91,26 +86,20 @@ class Timeline(Module):
             self.draw_dots(canvas, Rect(axis_x, rect.y, rect.right - axis_x, rect.h))
 ```
 
-Points worth noticing:
+What it uses:
 
-- `self.opt(key, default)` reads a YAML option and expands any
-  `$theme.…` reference. `self.length(key)` does the same and converts a
-  length with units to millimetres.
-- `self.stroke` and `self.stroke_width` come from the theme unless the
-  module's YAML overrides them.
-- `self.text(...)` draws in the theme's `label` style. Baselines are placed
-  from `self.cap_height("label")`, which is read from the font file, so the
-  label is optically centred on its tick.
-- `self.draw_dots(...)` samples the *page's* dot lattice inside whatever rect
-  you hand it. The dots line up with every other dotted module on the page
-  because the lattice is anchored to the page, not to your module.
-- `self.ctx.grid` is the document's module grid, if you want your internal
-  geometry to sit on it too. Nothing forces that: the invariant is about the
-  module's *placement*, not what it draws inside.
+- `self.opt(key, default)` reads a YAML option; `self.length(key)` does the
+  same and converts units to millimetres.
+- `self.stroke` and `self.stroke_width` come from the theme unless the YAML
+  overrides them.
+- `self.text(...)` draws in the theme's `label` style. Placing the baseline
+  at `y + cap_height / 2` centres a capital on `y`.
+- `self.draw_dots(rect)` samples the page's dot lattice inside whatever rect
+  you give it, so the dots line up with every other dotted module.
+- `self.ctx.grid` is the module grid. Nothing forces your internal geometry
+  onto it; the grid rule is about where the module is placed.
 
-## Use it
-
-Check it is registered:
+## Try it
 
 ```sh
 journalkit modules | grep -A4 '^timeline'
@@ -123,33 +112,20 @@ timeline — Hour marks down the left edge with a writing area beside them.  [ti
       …
 ```
 
-Try it without touching a template:
+`preview` renders a snippet without a template file:
 
 ```sh
 echo '- {type: heading, text: TODAY}
 - {type: timeline, start: 7, end: 19, dots: true}' | journalkit preview
 ```
 
-```
-wrote /…/out/preview/preview-01-preview.png
-```
+<figure markdown>
+![The timeline module in a preview](../assets/screens/tutorial-timeline.png){ width="300" }
+<figcaption>out/preview/preview-01-preview.png</figcaption>
+</figure>
 
-Then put it on a page:
+Then use it in a template like any other module. With `height: fill` the
+hour spacing stretches to fit; without it, `natural_height` decides.
 
-```yaml
-      - type: timeline
-        start: 7
-        end: 21
-        height: fill
-        dots: true
-```
-
-With `height: fill` the module stretches and the hour spacing adapts; without
-it, `natural_height` decides.
-
-## What to read next
-
-- The [custom modules guide](../guide/custom-modules.md) covers the rest of
-  the `Module` API: markers, label bands, icons, per-module theme overrides,
-  and how containers lay out children.
-- The [Python API reference](../reference/python-api.md) lists every helper.
+The [custom modules guide](../guide/custom-modules.md) lists the rest of the
+`Module` API.

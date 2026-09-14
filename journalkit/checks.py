@@ -6,10 +6,10 @@ Two things, behind ``journalkit check``:
   Drives the layout engine rather than parsing SVG, because the invariant is
   about where the engine puts modules, not about every rect in the file; a
   module is free to draw sub-grid detail inside its own box.
-* ``fonts`` — the PDFs embed the font the theme asked for. Inkscape does not
-  warn when a font is missing; it substitutes and exits 0. The page still
-  looks plausible, but baselines are placed from that font's cap height, so
-  every label shifts. Scanning ``/BaseFont`` in the PDF is the cheap catch.
+* ``fonts`` — the PDFs carry text the way the theme asked. With outlined
+  text (the default) that means no fonts embedded at all; with
+  ``font.outline: false`` it means only the theme's family. Either way a
+  stray substitution shows up as an unexpected ``/BaseFont``.
 """
 
 from __future__ import annotations
@@ -109,24 +109,34 @@ def embedded_fonts(pdf: Path) -> list[str]:
     return sorted({n.split("+")[-1] for n in names})
 
 
-def check_fonts(pairs: list[tuple[Path, str]], out=print) -> int:
-    """Assert each PDF embeds only the family it was designed for.
+def check_fonts(pairs: list[tuple[Path, str, bool]], out=print) -> int:
+    """Assert each PDF carries the text it was designed with.
 
-    ``pairs`` is ``(pdf_path, expected_family)``. A family name with spaces
-    appears in the PDF without them (``Source Sans`` → ``SourceSans-Bold``).
-    Returns the number of PDFs whose fonts were substituted.
+    ``pairs`` is ``(pdf_path, family, outlined)``. A document rendered with
+    outlined text (the default) must embed **no** fonts at all: any font in
+    the PDF means an SVG ``<text>`` slipped through and Inkscape set it in
+    whatever it had. A document rendered with ``font.outline: false`` must
+    embed only its own family. Returns the number of PDFs that fail.
     """
     failed = 0
-    for pdf, family in pairs:
+    for pdf, family, outlined in pairs:
         if not pdf.exists():
             out("%-28s (not built — run `journalkit build --pdf`)" % pdf.name)
             continue
         fonts = embedded_fonts(pdf)
-        wanted = family.replace(" ", "")
-        good = bool(fonts) and all(f.startswith(wanted) for f in fonts)
-        out("%-28s %s" % (pdf.name, ", ".join(fonts) or "(no embedded fonts)"))
+        if outlined:
+            good = not fonts
+            shown = "text outlined, no fonts embedded" if not fonts else ", ".join(fonts)
+        else:
+            wanted = family.replace(" ", "")
+            good = bool(fonts) and all(f.startswith(wanted) for f in fonts)
+            shown = ", ".join(fonts) or "(no embedded fonts)"
+        out("%-28s %s" % (pdf.name, shown))
         if not good:
-            out("  FAIL expected only %s — got %s" % (family, fonts))
+            if outlined:
+                out("  FAIL text should be outlined but %s was embedded" % ", ".join(fonts))
+            else:
+                out("  FAIL expected only %s — got %s" % (family, fonts))
             failed += 1
     out("\n%s" % ("fonts ok" if not failed else "%d PDF(s) with substituted fonts" % failed))
     return failed

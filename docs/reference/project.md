@@ -1,7 +1,6 @@
 # Project directory
 
-journalkit runs on a directory with this shape. Only `templates/` is
-required.
+A project is a directory with this shape. Only `templates/` is required.
 
 ```
 my-journal/

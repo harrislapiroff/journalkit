@@ -2,36 +2,29 @@
 
 ## journalkit
 
-journalkit is a command line tool. The recommended way to install a Python
-command line tool is [pipx](https://pipx.pypa.io/), which gives it an
-isolated environment and puts the `journalkit` command on your `PATH`.
+[pipx](https://pipx.pypa.io/) installs a Python command line tool in its own
+environment and puts it on your `PATH`:
 
 ```sh
 pipx install https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
 ```
 
-That URL is GitHub's archive of the `main` branch. pip downloads and installs
-it directly; no git is involved. To install a specific release instead, use a
-tag: `.../archive/refs/tags/v0.2.0.tar.gz`.
-
-Upgrade later with the same command plus `--force`.
-
-Check it worked:
+That is GitHub's archive of the `main` branch; pip installs it directly, no
+git needed. For a specific release use a tag:
+`.../archive/refs/tags/v0.2.0.tar.gz`. Upgrade with the same command plus
+`--force`.
 
 ```sh
 journalkit --version
 ```
 
-!!! note "Without pipx"
-    Any Python 3.10+ environment works: `pip install <the same URL>`. pipx is
-    recommended only because it keeps the tool separate from your other
-    Python packages.
+Plain `pip install <the same URL>` works too, in any Python 3.10+
+environment.
 
 ## Inkscape and Ghostscript
 
-SVG output needs nothing else. For **PDF** and **PNG** output journalkit
-shells out to Inkscape, which embeds fonts properly, and for multi-page
-documents to Ghostscript, which concatenates the per-page PDFs.
+Only needed for PDF and PNG output. Inkscape does the conversion;
+Ghostscript joins the pages of a multi-page document into one PDF.
 
 === "macOS"
 
@@ -50,18 +43,10 @@ documents to Ghostscript, which concatenates the per-page PDFs.
 === "Windows"
 
     Install [Inkscape](https://inkscape.org/release/) and
-    [Ghostscript](https://ghostscript.com/releases/gsdnld.html), and make
-    sure `inkscape` and `gs` are on your `PATH`.
+    [Ghostscript](https://ghostscript.com/releases/gsdnld.html) and put
+    `inkscape` and `gs` on your `PATH`.
 
-## A font
-
-Text is positioned from the font's cap height, and Inkscape substitutes a
-missing font *without warning*. Install the font your templates use before
-you build a PDF. The default theme and the starter project use
-[Montserrat](https://fonts.google.com/specimen/Montserrat); download it and
-install it system-wide.
-
-## Check everything
+## Check
 
 ```sh
 journalkit doctor
@@ -72,12 +57,12 @@ tools (only needed for --pdf and --png):
   ok   inkscape  /opt/homebrew/bin/inkscape
   ok   gs        /opt/homebrew/bin/gs
 fonts:
-  ok   Montserrat installed
+  ok   Montserrat (bundled with journalkit) — text will be outlined, nothing to install
 project:
   FAIL /Users/you has no templates/ — run `journalkit init` to start one
 
 MISSING: project
 ```
 
-The last line is expected: you have not made a project yet. That is the
+The last line is expected; making a project is the
 [next step](first-journal.md).

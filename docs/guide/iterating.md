@@ -1,7 +1,5 @@
 # Iterating with watch and preview
 
-Two commands are built for the edit–look loop.
-
 ## `watch`
 
 Rebuilds on every save until you interrupt it:
@@ -58,14 +56,12 @@ wrote /…/my-journal/out/preview/preview-01-preview.svg
 wrote /…/my-journal/out/preview/preview-01-preview.png
 ```
 
-The project's `modules/` and `icons/` are available, so this is the
-fastest loop for developing a module: edit the `.py`, re-run the pipe, look.
+The project's `modules/` and `icons/` are available, so this is a quick
+loop for developing a module: edit the `.py`, re-run the pipe, look.
 `--project DIR` points it at a different project; `--modules FILE` loads an
 extra module file from anywhere; `--debug` adds the grid overlay.
 
 ## The debug overlay
 
 `--debug` on `build`, `watch` or `preview` draws the module grid in blue and
-the content rectangle as a pink dashed box. It answers most "why is this
-here?" questions at a glance: a module edge that is not on a blue line has
-been snapped, and a gap that looks wrong usually is one.
+the content rectangle as a pink dashed box.

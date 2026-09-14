@@ -40,8 +40,9 @@ build-backend = "setuptools.build_meta"
 packages = ["journalkit", "journalkit.modules"]
 
 [tool.setuptools.package-data]
-# The built-in icons and the `journalkit init` scaffold travel with the wheel.
-journalkit = ["icons/*.svg", "scaffold/**/*"]
+# Built-in icons, the bundled Montserrat weights (OFL) and the `init` scaffold
+# travel with the wheel.
+journalkit = ["icons/*.svg", "fonts/*.ttf", "fonts/OFL.txt", "scaffold/**/*"]
 
 [tool.setuptools.exclude-package-data]
 journalkit = ["**/__pycache__/*", "**/*.pyc"]

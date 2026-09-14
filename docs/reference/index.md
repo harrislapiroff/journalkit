@@ -1,7 +1,7 @@
 # Reference
 
-Complete and exact. If a fact is not here, the source is the authority; the
-file names below point at it.
+If something is not here, the source file named in the last column is the
+authority.
 
 | page | covers | source |
 |---|---|---|

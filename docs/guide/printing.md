@@ -1,20 +1,20 @@
 # Printing and checking
 
-## Build the PDF
+## The PDF
 
 ```sh
 journalkit build --pdf
 ```
 
-For each document, journalkit renders every page to SVG, has Inkscape
-convert each to PDF with the fonts embedded, and has Ghostscript concatenate
-them into `out/<document>.pdf`. A single-page document skips Ghostscript.
+Each page is rendered to SVG, converted to PDF by Inkscape, and the pages
+joined by Ghostscript into `out/<document>.pdf`. A single-page document
+skips Ghostscript.
 
-The PDF's page size is exactly the document's `page.size`. If your printer
-wants a larger sheet with the page imposed on it, do that in your print
-dialog or imposition tool; journalkit produces trimmed pages.
+The PDF page size is the document's `page.size`: trimmed pages. Imposing
+them onto a larger sheet is a job for the print dialog or an imposition
+tool.
 
-## Check it
+## Check
 
 ```sh
 journalkit check
@@ -28,55 +28,47 @@ daily / back                    2.5mm   3 placements, 0 off-grid
 9 placements checked; all on the 2.5mm grid
 
 == embedded fonts ==
-daily.pdf                    Montserrat-Bold, Montserrat-Medium
+daily.pdf                    text outlined, no fonts embedded
 
 fonts ok
 ```
 
-Two checks, and both catch things you cannot see:
+**Grid**: every module placement, including children of `row` and `stack`,
+is on the document's module grid. What a module draws inside its rectangle
+isn't counted. A page whose content rectangle is itself off the lattice gets
+a note and its placements are checked relative to it.
 
-**Grid.** Every module placement, including children of `row` and `stack`,
-is on the document's module grid. This drives the layout engine rather than
-reading the SVG, so what a module draws *inside* its rect is not counted.
-A page whose content rectangle is itself off the lattice (see
-[the two grids](../explanation/two-grids.md)) gets a note, and its placements
-are checked relative to it.
+**Fonts**: text is drawn as outlines, so a correct PDF embeds no fonts. If a
+font does appear, an SVG `<text>` got through and Inkscape set it in
+whatever it had; with `font.outline: false` the check instead asserts that
+only the theme's family is embedded.
 
-**Fonts.** Every `/BaseFont` embedded in each PDF is a subset of the family
-the document's theme asked for. Inkscape substitutes a missing font
-*silently* and exits 0, and because baselines are placed from the intended
-font's cap height, a substituted page looks plausible with every label
-shifted. This is the only cheap detection.
-
-`check` exits non-zero on any failure, so it belongs in a script that builds
-your journal:
+`check` exits non-zero on a failure, so in a script:
 
 ```sh
 journalkit build --pdf --strict && journalkit check
 ```
 
-## Before sending to print
+## Before printing
 
-- Run `journalkit doctor` on the machine doing the build. It checks Inkscape,
-  Ghostscript and every font family your templates name.
-- Proof one page at print size. `journalkit build --png --dpi 300` gives a
-  PNG you can print at 100% to check stroke weights; 0.25 pt hairlines are
-  the default and reproduce well on a laser printer, but check yours.
-- Transparent background: `--no-background` omits the white page fill, for
-  imposing onto coloured stock in another tool.
-- Repeated pages: `{template: daily, repeat: 31}` in `pages:` puts a month of
-  dailies in one PDF.
+- `journalkit doctor` on the machine doing the build: Inkscape, Ghostscript,
+  and whether each font the templates name was found.
+- Proof one page at 100% from `journalkit build --png --dpi 300` to check
+  stroke weights on your printer. The default hairline is 0.25 pt.
+- `--no-background` omits the white page fill, for imposing onto coloured
+  stock elsewhere.
+- `{template: daily, repeat: 31}` under `pages:` puts a month of dailies in
+  one PDF.
 
-## Output layout
+## Output
 
 ```
 out/
-  daily-01-front.svg       one SVG per page: <document>-<nn>-<page>.svg
-  daily-02-back.svg
+  daily-01-front.svg       <document>-<nn>-<page>.svg
   daily-01-front.png       with --png
   daily.pdf                with --pdf
-  preview/                 from `journalkit preview`
+  preview/                 from journalkit preview
 ```
 
-`out/` is safe to delete; everything in it is regenerated. `-o DIR` writes
+Everything in `out/` is regenerated; delete it freely. `-o DIR` writes
 elsewhere.

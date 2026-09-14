@@ -10,8 +10,7 @@ once, at one place, and never again.
 Margins are `inner` (the binding side) and `outer`, not left and right. A
 template declares `side: right` for a recto or `side: left` for a verso.
 When the page's content rectangle is computed, `inner` becomes the left
-margin on a recto and the right margin on a verso. That is the entire
-mechanism.
+margin on a recto and the right margin on a verso.
 
 ```yaml
 page:
@@ -27,11 +26,10 @@ single-sided card, or a page whose two sides are genuinely different.
 ## Modules never see the side
 
 Every module receives a rectangle and draws inside it. It is not told
-whether the page is a recto or a verso, and it must not find out (the
-information is in the render context for the engine's own use, and a module
-that reads it is a bug). This is a deliberate constraint: a template is
-written once and is correct on both sides, and a module written for one
-project works in every other.
+whether the page is a recto or a verso (the render context carries the side
+for the engine's own use; a module that reads it is a bug). A template is
+therefore written once and works on both sides, and a module written for one
+project works in any other.
 
 If you find yourself wanting a module to behave differently on the two
 sides, the answer is two templates, or a decoration anchored to `inner` or
@@ -53,11 +51,11 @@ lands 4 mm into the binding margin on both sides of the spread without
 changing. `left` and `right` anchors, by contrast, stay put; use them for
 things that must not mirror.
 
-## What this buys
+## Consequences
 
-- One template per page design, not two.
-- Mirroring cannot be half-applied: there is no second place it happens.
-- `journalkit check` can verify it. The test suite renders a recto and a
+- One template per page design.
+- Mirroring cannot be half-applied; there is no second place it happens.
+- The test suite renders a recto and a
   verso from the same template and asserts the content rectangles are
   reflections, deriving every number from the document rather than pinning
   coordinates — so a redesign of the page changes the output without

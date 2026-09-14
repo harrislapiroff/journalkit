@@ -20,7 +20,7 @@ ends exactly where its container does.
 
 The consequence is that any two modules on a page, or on two pages, line up
 with each other without anyone arranging it. A checklist's row edges sit on
-the same lines as the box above it. That is the whole point.
+the same lines as the box above it.
 
 The grid constrains the *placement*. What a module draws inside its own
 rectangle is its business: `habit_grid` divides its width into seven columns

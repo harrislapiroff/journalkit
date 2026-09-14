@@ -2,9 +2,7 @@
 
 A dotted box with a label in its corner has a problem: some dots fall in the
 label's ink. On screen the text covers them; on a printed page a dot behind
-a letter reads as a smudge. journalkit resolves this by not drawing those
-dots, and the way it decides *which* dots is a small design decision worth
-explaining.
+a letter reads as a smudge. journalkit leaves those dots out.
 
 ## Drop, never shift
 

@@ -1,9 +1,8 @@
 # journalkit
 
-**Page templates for a printable, hand-bound journal.** You describe each page
-as a list of modules in YAML — a dated header, a rating scale, a dotted notes
-box, a checklist — and journalkit lays them out on a modular grid and renders
-print-ready SVG and PDF.
+journalkit turns a YAML description of a journal page into print-ready SVG
+and PDF. You list the modules a page should have — a date field, a heading,
+a dotted box, a checklist — and it lays them out on a grid.
 
 ```sh
 pipx install https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
@@ -11,58 +10,29 @@ journalkit init my-journal && cd my-journal
 journalkit build --pdf
 ```
 
-<div class="grid cards" markdown>
+<figure markdown>
+![A daily page and a weekly page rendered by journalkit](assets/screens/example-daily-front.png){ width="300" }
+![](assets/screens/example-weekly-plan.png){ width="300" }
+<figcaption>Two pages from the example project, rendered to PNG.</figcaption>
+</figure>
 
--   :material-school:{ .lg .middle } **Tutorial**
+<!-- Enable once docs/assets/photos/daily-front.jpg and weekly-plan.jpg exist:
+<figure markdown>
+![The daily page, printed and bound in a ring binder](assets/photos/daily-front.jpg){ width="300" }
+![The weekly page, printed](assets/photos/weekly-plan.jpg){ width="300" }
+<figcaption>The same pages printed, trimmed and punched for a ring binder.</figcaption>
+</figure>
+-->
 
-    ---
+## Where to start
 
-    Install, build a starter journal, add a page, write your first module.
-    Start here if you have never used journalkit.
+- [Tutorial](tutorial/index.md): install, build the starter project, add a
+  page, write a module. About twenty minutes.
+- [Guides](guide/index.md): how to do particular things.
+- [Reference](reference/index.md): every command, key and parameter.
+- [Explanation](explanation/index.md): why it works the way it does.
 
-    [:octicons-arrow-right-24: Begin](tutorial/index.md)
-
--   :material-map-marker-path:{ .lg .middle } **Guides**
-
-    ---
-
-    Task-oriented recipes: pick a page size and grid, theme a document, add
-    icons, put a rule in the binding margin, iterate with `watch`.
-
-    [:octicons-arrow-right-24: Guides](guide/index.md)
-
--   :material-book-open-variant:{ .lg .middle } **Reference**
-
-    ---
-
-    Every command, every key in a document, every module parameter, every
-    theme value, and the Python API.
-
-    [:octicons-arrow-right-24: Reference](reference/index.md)
-
--   :material-lightbulb-on:{ .lg .middle } **Explanation**
-
-    ---
-
-    Why there are two grids, how mirroring works, why a missing font moves
-    every baseline, and the principles behind the design.
-
-    [:octicons-arrow-right-24: Explanation](explanation/index.md)
-
-</div>
-
-## What it does
-
-A **document** is one YAML file: a page size, margins, a grid, a theme, and
-one or more page **templates**, each a vertical stack of **modules**. Modules
-are the building blocks — `box`, `heading`, `fields`, `checklist`, `lines`,
-`rating`, `habit_grid` and a few more — and each snaps to the document's
-module grid, so everything on the page lines up with everything else.
-
-journalkit runs on a **project directory**: `templates/` for your documents,
-optional `modules/` for your own module types in Python, optional `icons/`
-for your own SVG artwork. `journalkit build` renders every document to SVG,
-and with Inkscape installed, to a multi-page PDF ready for the printer.
+## What a document looks like
 
 ```yaml title="templates/daily.yaml"
 document: daily
@@ -83,13 +53,15 @@ templates:
 pages: [front]
 ```
 
+A project is a directory with a `templates/` folder of files like this, and
+optionally `modules/` for your own module types in Python and `icons/` for
+your own SVG icons.
+
 ## Requirements
 
-- Python 3.10 or newer, and PyYAML (installed automatically).
-- For PDF and PNG output: [Inkscape](https://inkscape.org) and, for
-  multi-page documents, [Ghostscript](https://ghostscript.com). SVG output
-  needs neither.
-- The font your theme names, installed system-wide. The default is
-  [Montserrat](https://fonts.google.com/specimen/Montserrat).
+Python 3.10 or newer. PDF and PNG output use [Inkscape](https://inkscape.org),
+and multi-page PDFs also use [Ghostscript](https://ghostscript.com); SVG
+output needs neither. Text is drawn with a bundled font, so there is nothing
+to install for that.
 
-journalkit is released under the BSD 3-Clause License.
+BSD 3-Clause License.

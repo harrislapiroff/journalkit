@@ -27,8 +27,8 @@ brew install --cask inkscape      # SVG -> PDF/PNG, embeds fonts
 brew install ghostscript          # merges per-page PDFs into one document
 ```
 
-The **Montserrat** font must be installed system-wide (`~/Library/Fonts/`)
-for the example project. This is not optional — see Gotchas.
+No font needs installing: Montserrat is bundled and text is drawn as
+outlines.
 
 `tools/dev.py doctor` is stdlib-only up to the venv check, so it runs with
 **system python3** on a clean checkout and tells you what to do next:
@@ -81,9 +81,9 @@ SMOKE PASSED
 | `journalkit build [SRC…] [-o DIR] [--pdf] [--png] [--dpi N] [--debug] [--strict]` | render; a directory builds every `templates/*.yaml`, default is `.` |
 | `journalkit watch [SRC…] [--pdf] [--png] [--debug]` | rebuild on every change; runs until interrupted |
 | `journalkit preview [--project DIR] [--modules F] [--debug]` | render ad-hoc module YAML **from stdin** to a PNG |
-| `journalkit check [SRC…]` | assert every placement is on the document's grid, and PDFs embed the theme's font |
+| `journalkit check [SRC…]` | assert every placement is on the document's grid, and PDFs embed no substituted fonts |
 | `journalkit modules [DIR]` | module types + parameters, project-local ones marked with their file |
-| `journalkit doctor [DIR]` | inkscape, ghostscript, and the fonts the project's templates use |
+| `journalkit doctor [DIR]` | inkscape, ghostscript, and whether each font the templates name was found |
 | `journalkit init [DIR]` | scaffold a new project (templates/daily.yaml, modules/stamp.py, README) |
 
 Output lands in `<project>/out/` — `examples/journal/out/` for the example —
@@ -189,8 +189,8 @@ weekly / week-notes             2.0mm   3 placements, 0 off-grid
 30 placements checked; all on the 2.0mm grid; 2 page(s) on an off-lattice content rect
 
 == embedded fonts ==
-daily.pdf                    Montserrat-Bold, Montserrat-Medium, Montserrat-Regular
-weekly.pdf                   Montserrat-Bold, Montserrat-Medium
+daily.pdf                    text outlined, no fonts embedded
+weekly.pdf                   text outlined, no fonts embedded
 
 fonts ok
 ```
@@ -239,7 +239,7 @@ must agree with `journalkit modules`, `reference/theme.md` with
 
 ```bash
 .venv/bin/python tools/dev.py test
-# → 30 "ok" lines, then: all tests passed     (~1s)
+# → 33 "ok" lines, then: all tests passed     (~1s)
 ```
 
 The suite renders in memory; the only files it writes are scaffolded
@@ -249,12 +249,11 @@ does not break the tests.
 
 ## Gotchas
 
-- **A missing font is silent and corrupts the layout.** Inkscape substitutes
-  without any warning and exits 0. Since baselines are placed from the font's
-  cap-height ratio, a substituted font shifts every label while still
-  *looking* like a valid page. `journalkit check` is the cheap detection —
-  it asserts every embedded `/BaseFont` is a subset of the document's
-  `theme.font.family`. Run it after any PDF build.
+- **Text is outlines, not `<text>`.** Grepping an SVG for a label's words
+  finds nothing; the words are `<path>` data. To read labels back in a test,
+  derive a theme with `{"font": {"outline": False}}` first (see
+  `test_habit_grid_is_built_in`). `journalkit check` asserts the PDF embeds
+  *no* fonts; one appearing means a `<text>` slipped through.
 
 - **`check` deliberately ignores geometry drawn inside a module.** The
   invariant is that the *layout engine* snaps placements — a module may draw

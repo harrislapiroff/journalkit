@@ -75,7 +75,7 @@ and the default theme. Output is `<project>/out/preview/preview-01-preview.{svg,
 
 ## `check`
 
-Assert the two invariants that cannot be seen.
+Two checks on the built output.
 
 ```
 journalkit check [SOURCE ...] [--project DIR] [-o DIR]
@@ -85,10 +85,11 @@ journalkit check [SOURCE ...] [--project DIR] [-o DIR]
    containers, lies on the document's module grid. A page whose content
    rectangle is itself off the lattice is noted and its placements are
    checked relative to it.
-2. **Fonts.** For each document whose PDF exists in the output directory,
-   every embedded `/BaseFont` (subset prefix stripped) begins with the
-   document's `theme.font.family` (spaces removed). A PDF that has not been
-   built is reported and skipped.
+2. **Fonts.** For each document whose PDF exists in the output directory:
+   with outlined text (the default) the PDF embeds no fonts; with
+   `font.outline: false`, every embedded `/BaseFont` (subset prefix
+   stripped) begins with `theme.font.family` (spaces removed). A PDF that
+   has not been built is reported and skipped.
 
 Exit 1 on any off-grid placement or substituted font.
 
@@ -112,10 +113,10 @@ Check the environment.
 journalkit doctor [DIR]
 ```
 
-Reports Inkscape and Ghostscript on `PATH`, whether each font family named
-by the project's templates is installed (system font directories, then
-`fc-list` if available), and whether `DIR` is a project. Exit 1 if anything
-is missing.
+Reports Inkscape and Ghostscript on `PATH`; for each font family the
+project's templates name, whether a font file was found (bundled with
+journalkit, or in the system font directories) and whether it has TrueType
+outlines; and whether `DIR` is a project. Exit 1 if anything is missing.
 
 ## `init`
 

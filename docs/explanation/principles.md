@@ -1,7 +1,6 @@
 # Design principles
 
-The short list. Each item is a constraint the code enforces or a test
-asserts, not an aspiration.
+Each of these is enforced by the code or asserted by a test.
 
 **Millimetres everywhere.** Every internal length is a float in millimetres
 and one SVG user unit is one millimetre. YAML may carry units; they are
@@ -20,9 +19,9 @@ is automatic rather than arranged. A module never chooses a phase.
 right when the content rectangle is computed. No module branches on the
 side.
 
-**Text is placed from the font.** Cap heights and advance widths are read
-from the installed font file. A missing font is checked for before the
-build and detected in the PDF after it.
+**Text is drawn from the font file.** Glyph outlines, cap heights and
+advance widths are read directly; the default font is bundled, and the
+output depends on nothing installed.
 
 **Dots are dropped, never shifted.** Where a dot would collide with a label
 it is omitted; the survivors stay on the lattice.
@@ -35,8 +34,8 @@ printed to stderr and the build succeeds, because the output is still
 useful for looking at. `--strict` is there for scripts. Only sizes the
 author wrote are worth warning about; intrinsic sizes snap silently.
 
-**A template is written once.** It is correct on a recto and a verso, in
-any project, with any theme.
+**A template is written once.** It works on a recto and a verso, in any
+project, with any theme.
 
 **Assert properties, not coordinates.** The tests and `check` derive every
 figure from the document. A redesign changes the output without breaking

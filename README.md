@@ -38,12 +38,10 @@ brew install --cask inkscape
 brew install ghostscript
 ```
 
-Install the font your templates use system-wide. The default theme and the
-starter project use [Montserrat](https://fonts.google.com/specimen/Montserrat);
-set `theme.font.family` to use anything else. Baselines are positioned from
-the font's cap height, and Inkscape substitutes a missing font *silently*, so
-`journalkit doctor` checks for it and `journalkit check` verifies the PDF
-afterwards.
+Text is drawn as outlines from a bundled copy of Montserrat, so there is no
+font to install. To use a different font, set `theme.font.family` and have
+it installed on the machine that builds; `journalkit doctor` reports whether
+it was found.
 
 ## A project
 
@@ -192,16 +190,9 @@ theme:
 | `text` | clears only the label's own width, so dots continue to its right |
 | `none` | dots run underneath the label |
 
-`text` measures the label from the font file itself — `journalkit/fontmetrics.py`
-is a small stdlib sfnt reader that pulls advance widths out of `hmtx`/`cmap`,
-so no font library is needed. If the font can't be found it falls back to a
-character-count estimate (`theme.font.avg_advance`), which is a safety net
-only: capitals in a typical sans range from 0.5em to over 0.9em, so the
-estimate under-reserves for wide words and over-reserves for long ones.
-
-The same reader supplies the cap height. `theme.font.cap_height` is null by
-default, meaning "read `OS/2` from the font"; set it explicitly to override,
-or to compensate for a font that publishes no cap height (the fallback is 0.7).
+`text` measures the label from the font file (`journalkit/fontmetrics.py`, a
+small sfnt reader with no dependencies). The same reader supplies the cap
+height used to place baselines, and the glyph outlines text is drawn with.
 
 ## Page geometry and mirroring
 
@@ -357,7 +348,7 @@ a cycle raises rather than hanging.
 theme:
   ink: "#231F20"
   stroke_width: 0.25pt
-  font: {family: Montserrat}   # cap_height read from the font
+  font: {family: Montserrat}   # bundled; outlines and cap height read from the file
   label: {size: 8pt, weight: 500, dx: 1.8, dy: 3.55}
   heading: {size: 12pt, weight: 700, icon_box: 6, icon_height: 4.6}
 ```
@@ -425,7 +416,8 @@ journalkit/         the library — what `pipx install journalkit` ships
   theme.py          defaults + deep merge
   icons.py          icon loading and placement
   icons/            the built-in icon set (package data)
-  fontmetrics.py    stdlib sfnt reader: advance widths + cap height
+  fontmetrics.py    sfnt reader: advance widths, cap height, glyph outlines
+  fonts/            Montserrat Regular/Medium/Bold (OFL), bundled
   svg.py            minimal SVG writer (1 user unit = 1 mm)
   render.py         page rendering, dot lattice, decorations
   checks.py         the grid and font checks behind `journalkit check`

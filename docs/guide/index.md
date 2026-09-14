@@ -1,15 +1,15 @@
 # Guides
 
-Recipes for specific tasks. Each assumes you have a project and know the
-basics from the [tutorial](../tutorial/index.md).
+How to do particular things. They assume the basics from the
+[tutorial](../tutorial/index.md).
 
-| Guide | When you want to… |
+| Guide | |
 |---|---|
-| [Choosing a page and grid](page-and-grid.md) | pick a page size, margins and grid that fit each other |
-| [Laying out a page](layout.md) | control heights, gaps, columns and `fill` |
-| [Theming](theming.md) | change colours, fonts, weights and spacing |
-| [Icons](icons.md) | use the built-in icons or bring your own SVG |
-| [Decorations](decorations.md) | draw page furniture outside the content flow |
-| [Custom modules](custom-modules.md) | add a module type in Python |
-| [Iterating with watch and preview](iterating.md) | see changes as you type |
-| [Printing and checking](printing.md) | make the PDF and prove it is right |
+| [Choosing a page and grid](page-and-grid.md) | page size, margins and a grid that fit each other |
+| [Laying out a page](layout.md) | heights, gaps, columns, `fill` |
+| [Theming](theming.md) | colours, fonts, weights, spacing |
+| [Icons](icons.md) | the built-in icons, or your own SVG |
+| [Decorations](decorations.md) | rules and text outside the content flow |
+| [Custom modules](custom-modules.md) | a module type in Python |
+| [Iterating with watch and preview](iterating.md) | seeing changes as you edit |
+| [Printing and checking](printing.md) | the PDF, and checking it |

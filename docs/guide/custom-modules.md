@@ -1,10 +1,9 @@
 # Custom modules
 
-A module type is one Python class. Put the file in your project's `modules/`
-and it is imported before every build; the `@register` decorator makes its
-name available as `type:` in YAML. The [tutorial](../tutorial/write-a-module.md)
-walks through writing one from scratch; this guide is the map of what a
-module can do.
+A module type is one Python class in your project's `modules/`. The file is
+imported before every build, and `@register` makes its name available as
+`type:` in YAML. The [tutorial](../tutorial/write-a-module.md) writes one
+from scratch; this page lists what a module can use.
 
 ## Skeleton
 
@@ -45,7 +44,7 @@ invariant is about placement, not about what you draw.
 
 | helper | draws |
 |---|---|
-| `self.text(canvas, x, y, text, style="label", **svg_attrs)` | themed text with its baseline at `(x, y)`; `style` is `label` or `heading`; overrides like `size=`, `weight=`, `colour=`, `text_anchor="middle"` pass through |
+| `self.text(canvas, x, y, text, style="label", **overrides)` | themed text with its baseline at `(x, y)`, drawn as outlines; `style` is `label` or `heading`; `size=`, `weight=`, `colour=`, `text_anchor="middle"` override |
 | `self.draw_label(canvas, rect, text=None)` | the top-left label at `theme.label.dx` / `dy`; `text` defaults to the `label` option |
 | `self.draw_dots(canvas, rect, reserve=(), label=None)` | the page dot lattice inside `rect`, honouring the `dots:` option and keeping clear of the label per `theme.dots.reserve_label` |
 | `self.draw_marker(canvas, box, marker=None)` | the checkbox marker centred in `box`, shape from the option or `theme.marker.shape` |
@@ -90,9 +89,8 @@ row.
 | `dot_points(rect, spacing=None, origin=None, inset=0, exclude=())` | lattice points strictly inside `rect` |
 | `warn(message)` | emit a build warning |
 
-Do **not** read `ctx.side` to decide how to draw. Mirroring is resolved
-before your module runs; a module that branches on the side will break the
-invariant that a template is written once.
+Don't read `ctx.side` to decide how to draw. Mirroring is resolved before
+your module runs, and a template is meant to work on either side unchanged.
 
 ## Sizing
 
@@ -126,6 +124,5 @@ can walk into it.
 
 ## Documenting
 
-`journalkit modules` prints each class's docstring and `params`. Project
-modules are marked with their file name. Keep `params` current; it is the
-only reference your future self will read.
+`journalkit modules` prints each class's docstring and `params`, and marks
+project modules with their file name.

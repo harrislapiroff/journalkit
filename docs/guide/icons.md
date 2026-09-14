@@ -20,15 +20,14 @@ Your own file wins over a built-in of the same name.
 count: 5` is `mood-1` through `mood-5`. Name your own scales the same way and
 they work the same way.
 
-## Requirements for your own SVG
+## Your own SVG
 
-Two, and both matter:
+Two requirements:
 
-- **The `viewBox` must be a tight bounding box of the artwork.** journalkit
-  scales and places icons by their `viewBox`; padding inside it becomes
-  visible misalignment on the page.
-- **Paths that should take the theme colour use `fill="currentColor"`.**
-  Anything else keeps its own fill. White fills are preserved as knockouts.
+- The `viewBox` is a tight bounding box of the artwork. Icons are scaled and
+  placed by their `viewBox`, so padding inside it shows up as misalignment.
+- Paths that should take the theme colour use `fill="currentColor"`.
+  Anything else keeps its own fill; white fills act as knockouts.
 
 The file is embedded as a `<g transform="translate(…) scale(…)">` wrapper
 around the SVG body, so path data is never rewritten and the file stays
@@ -47,9 +46,9 @@ inkscape --export-id=path42 --export-id-only --export-area-drawing \
 python3 tools/extract_icons.py raw/sunrise.svg -o my-journal/icons/
 ```
 
-`tools/extract_icons.py` is in the source repository, not in the installed
-package. The built-in set was produced this way, so it is a fair template
-for what a finished icon file should look like.
+`tools/extract_icons.py` is in the source repository, not the installed
+package. The built-in icons were made this way and show what a finished file
+looks like.
 
 ## Sizing
 
@@ -61,5 +60,5 @@ for what a finished icon file should look like.
   `theme.rating.icon_gap` between them, aligned to the right edge.
 - As a marker (`marker: icon:<name>`), the icon fills the marker box.
 
-A run of icons that must look optically equal should share a height, which
-is why these sizes fix the height and let the width follow.
+These fix the height and let the width follow, so a run of icons looks
+even.

@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from .. import fontmetrics
 from ..geometry import Rect
-from ..units import is_fill, mm
+from ..units import fmt, is_fill, mm
 
 REGISTRY: dict[str, type] = {}
 
@@ -149,19 +149,33 @@ class Module:
 
     # -- shared helpers ----------------------------------------------------
     def text(self, canvas, x, y, content, style="label", **overrides):
-        """Draw themed text with its baseline at ``(x, y)``."""
+        """Draw themed text with its baseline at ``(x, y)``.
+
+        Glyphs are drawn as outlines from the font file, so the page needs no
+        installed font.  If the font has no readable outlines (CFF, or not
+        found) — or ``theme.font.outline`` is false — an SVG ``<text>`` is
+        emitted instead and the renderer relies on the font being installed.
+        """
         size = mm(overrides.pop("size", None) or self.theme.get("%s.size" % style))
         weight = overrides.pop("weight", None) or self.theme.get("%s.weight" % style)
         colour = overrides.pop("colour", None) or self.theme.get("%s.colour" % style)
         tracking = mm(overrides.pop("tracking", None) or self.theme.get("%s.tracking" % style, 0))
         family = overrides.pop("family", None) or self.theme.get("font.family")
-        attrs = dict(
-            font_family=family,
-            font_size=size,
-            font_weight=weight,
-            fill=colour,
-            **overrides,
-        )
+        anchor = overrides.pop("text_anchor", None) or "start"
+        content = str(content)
+
+        metrics = fontmetrics.load(family, weight) if self.theme.get("font.outline", True) else None
+        if metrics is not None and metrics.has_outlines and content:
+            d = metrics.outline(content, size, tracking, anchor)
+            if d:
+                canvas.path(d, transform="translate(%s,%s)" % (fmt(x), fmt(y)), fill=colour,
+                            stroke="none", **overrides)
+            return
+
+        attrs = dict(font_family=family, font_size=size, font_weight=weight, fill=colour,
+                     **overrides)
+        if anchor != "start":
+            attrs["text_anchor"] = anchor
         if tracking:
             attrs["letter_spacing"] = tracking
         canvas.text(x, y, content, **attrs)

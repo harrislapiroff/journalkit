@@ -211,12 +211,53 @@ def test_label_clearance_modes():
     assert narrow.label_band(rect).w > 9.34
 
 
+def test_bundled_font_is_found_first():
+    """The default family resolves to the copy inside the package, wherever
+    the build runs and whatever else is installed."""
+    from journalkit import fontmetrics
+
+    for weight in (400, 500, 700):
+        metrics = fontmetrics.load("Montserrat", weight)
+        assert metrics is not None
+        assert fontmetrics.BUNDLED_FONTS in metrics.path.parents, metrics.path
+        assert metrics.has_outlines
+
+
+def test_text_is_drawn_as_outlines():
+    """No <text> in the output: the page depends on no installed font."""
+    document = spec.load(EXAMPLE / "templates" / "daily.yaml")
+    pages = Renderer(document).render_all()
+    for _, svg in pages:
+        assert "<text" not in svg
+        assert "<path" in svg
+
+    from journalkit import fontmetrics
+    metrics = fontmetrics.load("Montserrat", 500)
+    size = mm("8pt")
+    d = metrics.outline("MOOD", size)
+    assert d.startswith("M") and "Q" in d and d.count("Z") >= 4, "four closed glyph contours at least"
+    # Anchors shift the whole run: an end-anchored path ends at the origin.
+    xs = [float(v) for v in re.findall(r"[ML](-?[\d.]+) ", metrics.outline("MOOD", size, anchor="end"))]
+    assert max(xs) <= 0.05 and min(xs) < -8
+    # Advance width is unchanged by outlining.
+    assert close(metrics.text_width("MOOD", size), 9.5, 0.3)
+
+
+def test_outline_can_be_switched_off():
+    ctx = _context()
+    module = build({"type": "text", "text": "HELLO", "theme": {"font": {"outline": False}}}, ctx)
+    from journalkit.svg import Canvas
+    canvas = Canvas(100, 100)
+    module.draw(canvas, Rect(0, 0, 50, 5))
+    svg = canvas.to_svg()
+    assert "<text" in svg and "Montserrat" in svg
+
+
 def test_font_metrics_are_read_from_the_font():
     from journalkit import fontmetrics
 
     metrics = fontmetrics.load("Montserrat", 500)
-    if metrics is None:
-        return  # font not installed on this machine; the estimate path covers it
+    assert metrics is not None, "bundled, so always present"
     assert metrics.units_per_em == 1000
     # The value journalkit used to hard-code, now taken from the OS/2 table.
     assert close(metrics.cap_ratio, 0.7, 0.001)
@@ -361,6 +402,8 @@ def test_habit_grid_is_built_in():
 
     assert "habit_grid" in REGISTRY
     document = spec.load(EXAMPLE / "templates" / "weekly.yaml")
+    # Render with <text> rather than outlines so the labels can be read back.
+    document.theme = document.theme.derive({"font": {"outline": False}})
     pages = Renderer(document).render_all()
     assert len(pages) == 2
 

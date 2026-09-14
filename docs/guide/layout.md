@@ -1,7 +1,7 @@
 # Laying out a page
 
-A template's `content` is a vertical stack. Every module in it gets the full
-content width and a height decided by these rules.
+A template's `content` is a vertical stack. Each module gets the full
+content width and a height decided as follows.
 
 ## Height
 
@@ -101,7 +101,6 @@ pages:
 ## Debugging a layout
 
 `journalkit build --png --debug` overlays the module grid and the content
-box. `journalkit check` reports every module placement against the grid
-without rendering. When a module is not where you expect, the overlay
-usually shows why in one glance: a gap you forgot, a height that snapped, or
-a `fill` that had nothing left to fill.
+box. When a module is not where you expect, the overlay usually shows why:
+a gap you forgot, a height that snapped, or a `fill` with nothing left to
+fill.

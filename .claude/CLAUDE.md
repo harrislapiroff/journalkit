@@ -56,10 +56,13 @@ To drive, screenshot, or verify the renderer, use the `run-journalkit` skill
   survivors stay on the lattice (`theme.dots.reserve_label`).
 - **Mirroring is resolved once**, when the content rect is computed from
   `inner`/`outer` margins. No module should ever branch on `side`.
-- **Text is positioned from `font.cap_height`**, read from whatever family
-  the theme names. A missing font substitutes silently in Inkscape and shifts
-  every baseline — `journalkit check` verifies the PDF's embedded fonts against
-  the document's own `theme.font.family`; run it after any PDF build.
+- **Text is drawn as outlines from the font file.** `Module.text` emits a
+  `<path>` built by `fontmetrics.FontMetrics.outline`; the SVG and PDF carry
+  no fonts. Montserrat Regular/Medium/Bold are bundled in `journalkit/fonts/`
+  (OFL, keep `OFL.txt` alongside) and found before system fonts, so output
+  is identical everywhere. `<text>` is only emitted for CFF fonts or
+  `theme.font.outline: false`; `journalkit check` asserts the PDF embeds no
+  fonts in the default case. Kerning is not applied — a known trade-off.
 - **Nothing pins the example's exact geometry.** `test_back_page_is_mirrored`
   and `journalkit check` derive every figure from the document, so a redesign
   changes the output without breaking them. Keep it that way: assert

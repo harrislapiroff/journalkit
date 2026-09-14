@@ -1,7 +1,7 @@
 # Python API
 
-journalkit is a library first and a command second. Everything the CLI does
-is a few calls away, and custom modules use the same objects.
+Everything the command does is available from Python, and custom modules
+use the same objects.
 
 ```python
 from journalkit import spec
@@ -133,13 +133,17 @@ private.
 ## `journalkit.fontmetrics`
 
 `load(family, weight=400) -> FontMetrics | None`
-:   Parse the installed font file for a family and weight, or `None` if not
-    found. Cached.
+:   Parse the font file for a family and weight, or `None` if not found.
+    Bundled fonts are searched first. Cached.
 
-`find_font(family, weight=400) -> Path | None`
+`find_font(family, weight=400) -> Path | None`, `BUNDLED_FONTS: Path`
 
 `FontMetrics`
-:   `units_per_em`, `cap_ratio`, `text_width(text, size, tracking=0.0)`.
+:   `units_per_em`, `cap_ratio`, `has_outlines`,
+    `text_width(text, size, tracking=0.0)`,
+    `outline(text, size, tracking=0.0, anchor="start") -> str` (SVG path data
+    in output units, baseline at the origin), `glyph_path(glyph_id) -> str`
+    (font units).
 
 ## `journalkit.project`
 
@@ -162,8 +166,8 @@ private.
 :   Number of off-grid placements across the documents.
 
 `check_fonts(pairs, out=print) -> int`
-:   `pairs` is `[(pdf_path, family)]`; returns the number of PDFs with
-    substituted fonts.
+:   `pairs` is `[(pdf_path, family, outlined)]`; returns the number of PDFs
+    that fail.
 
 `embedded_fonts(pdf) -> list[str]`
 

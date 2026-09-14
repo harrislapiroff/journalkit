@@ -1,10 +1,9 @@
 # Add a page
 
-You will write a weekly overview from scratch: a header, a habit tracker,
-and two columns of day boxes. Along the way you meet containers, `fill`
-weights, and the debug overlay.
+A weekly overview from scratch: a header, a habit tracker, two columns of
+day boxes. Along the way: containers, `fill` weights, the debug overlay.
 
-## Start a new document
+## Start a document
 
 Create `templates/weekly.yaml`:
 
@@ -31,14 +30,8 @@ templates:
 pages: [plan]
 ```
 
-Build it with a live preview running so you can see each change:
-
-```sh
-journalkit watch --png
-```
-
-Leave that terminal open; it rebuilds on every save. Open `out/weekly-01-plan.png`
-in a viewer that reloads on change.
+Run `journalkit watch --png` in a second terminal. It rebuilds on every save,
+so you can keep `out/weekly-01-plan.png` open in a viewer that reloads.
 
 ## A heading and a habit grid
 
@@ -54,14 +47,12 @@ Add to `content`:
         row_height: 5
 ```
 
-Two named habits, then two blank rows. A blank habit gets a rule to write on
-instead of a label. The grid works out its own height from the row count, so
-you did not give it one.
+A blank habit gets a rule to write on. The grid works out its height from
+the number of rows, so it needs no `height`.
 
 ## Two columns of days
 
-A page's `content` is a stack. To put things side by side you nest a `row`,
-and inside each column a `stack`:
+`content` is a stack. For columns, nest a `row` with a `stack` in each:
 
 ```yaml
       - type: row
@@ -80,37 +71,31 @@ and inside each column a `stack`:
             content:
               - {type: box, label: TUE, height: fill}
               - {type: box, label: THU, height: fill}
-              - {type: box, label: "SAT / SUN", height: fill}
-```
-
-Save and look. The row takes all the remaining height (`height: fill`) and
-sits 5 mm below the habit grid (`gap` is the space *before* a module).
-Inside it two stacks split the width equally, and inside each stack three
-boxes split the height equally. Every edge is on the 2.5 mm grid, and the
-bottom of the last box is exactly the bottom margin.
-
-Give the weekend more room by weighting its `fill`:
-
-```yaml
               - {type: box, label: "SAT / SUN", height: fill, flex: 2}
 ```
 
-`flex` is the relative share of leftover space among siblings that fill. The
-weekend box is now twice the height of TUE and THU. Leftover space is divided
-by weight and rounded *down* to the grid, with the remainder going to the last
-filling child, so the column still ends on the margin.
+<figure markdown>
+![The weekly plan page](../assets/screens/tutorial-weekly-plan.png){ width="300" }
+![The same page with the debug overlay](../assets/screens/tutorial-weekly-debug.png){ width="300" }
+<figcaption>The page, and the same page built with <code>--debug</code>.</figcaption>
+</figure>
 
-## See the grid
+The row takes the remaining height and sits 5 mm below the habit grid
+(`gap` is the space before a module). The two stacks split the width. Inside
+each, the boxes split the height by `flex`: the weekend box has weight 2, so
+it is twice the height of TUE and THU. Shares are rounded down to the grid
+and the remainder goes to the last box, so the column ends exactly on the
+margin.
 
-Stop `watch` (Ctrl-C) and build once with the overlay:
+To see the grid, build once with the overlay:
 
 ```sh
 journalkit build templates/weekly.yaml --png --debug
 ```
 
-Blue lines are the module grid; the pink dashed rectangle is the content
-area. Every module edge sits on a blue line. That is the property `journalkit
-check` asserts without drawing anything.
+Blue lines are the module grid, the pink dashed box is the content area.
+Every module edge is on a blue line. `journalkit check` asserts the same
+thing without drawing.
 
 ## The verso
 
@@ -131,9 +116,13 @@ templates:
 pages: [plan, notes]
 ```
 
-Build. On `weekly-02-notes.png` the binding margin and the rule have moved
-to the right edge. Ruled lines are 7.5 mm apart — three grid steps — so they
-line up with anything else on the page.
+<figure markdown>
+![The weekly notes page](../assets/screens/tutorial-weekly-notes.png){ width="300" }
+<figcaption>The verso: binding margin and rule on the right.</figcaption>
+</figure>
 
-You now have a two-document project. `journalkit build` with no arguments
-renders both. Next: [write a module](write-a-module.md).
+The rules are 7.5 mm apart, three grid steps, so they line up with anything
+else on the page.
+
+`journalkit build` with no arguments now renders both documents. Next:
+[write a module](write-a-module.md).

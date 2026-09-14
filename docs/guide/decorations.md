@@ -1,9 +1,8 @@
 # Decorations
 
-Decorations are page furniture that sits outside the content flow: a rule in
-the binding margin, a year printed in the footer, a running head. They can be
-declared for the whole document or for one template, and they are drawn
-under the content unless you say `above: true`.
+Decorations sit outside the content flow: a rule in the binding margin, a
+year in the footer, a running head. Declare them for the document or for one
+template. They draw under the content unless `above: true`.
 
 ```yaml
 decorations:                  # every page
