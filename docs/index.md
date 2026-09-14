@@ -16,13 +16,11 @@ journalkit build --pdf
 <figcaption>Two pages from the example project, rendered to PNG.</figcaption>
 </figure>
 
-<!-- Enable once docs/assets/photos/daily-front.jpg and weekly-plan.jpg exist:
 <figure markdown>
 ![The daily page, printed and bound in a ring binder](assets/photos/daily-front.jpg){ width="300" }
 ![The weekly page, printed](assets/photos/weekly-plan.jpg){ width="300" }
 <figcaption>The same pages printed, trimmed and punched for a ring binder.</figcaption>
 </figure>
--->
 
 ## Where to start
 

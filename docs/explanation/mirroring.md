@@ -23,6 +23,12 @@ templates:
 Write `left` and `right` explicitly instead and mirroring is off — for a
 single-sided card, or a page whose two sides are genuinely different.
 
+<figure markdown>
+![A recto page in a ring binder, wide margin at the rings](../assets/photos/weekly-plan.jpg){ width="280" }
+![A verso page in the same binder, wide margin at the rings](../assets/photos/weekly-notes.jpg){ width="280" }
+<figcaption>A recto and a verso from one template pair. The binding margin follows the rings.</figcaption>
+</figure>
+
 ## Modules never see the side
 
 Every module receives a rectangle and draws inside it. It is not told

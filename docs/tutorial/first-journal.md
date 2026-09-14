@@ -133,4 +133,10 @@ fonts ok
 Text is drawn as outlines from a font bundled with journalkit, so the PDF
 embeds no fonts and looks the same on any machine.
 
+<figure markdown>
+![A printed daily page in a ring binder](../assets/photos/daily-front.jpg){ width="280" }
+![Its verso](../assets/photos/daily-back.jpg){ width="280" }
+<figcaption>A two-page daily like this one, printed and bound.</figcaption>
+</figure>
+
 Next: [add a page](add-a-page.md).
