@@ -1,7 +1,7 @@
 # Daily journal spread. Started as a reproduction of the original Illustrator
 # design (25mm gutter, 2.5/5mm grids) and was redrawn on a 2/4mm grid.
 #
-#   ../.venv/bin/python -m pagekit build templates/daily.yaml --pdf
+#   journalkit build examples/journal --pdf
 #
 # All lengths are millimetres unless suffixed (0.25pt, 1in, 12px).
 

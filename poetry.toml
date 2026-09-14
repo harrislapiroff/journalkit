@@ -1,6 +1,6 @@
 # Keep the virtualenv at ./.venv rather than in Poetry's global cache.
-# Everything else in this repo — the `pagekit-dev doctor` checks, the paths in
-# .claude/skills/run-pagekit/SKILL.md, and the permission allowlist in
+# Everything else in this repo — `tools/dev.py doctor`, the paths in
+# .claude/skills/run-journalkit/SKILL.md, and the permission allowlist in
 # .claude/settings.json — refers to .venv/bin/, so this must stay true.
 [virtualenvs]
 in-project = true

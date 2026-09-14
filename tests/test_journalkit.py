@@ -1,20 +1,26 @@
-"""Tests.  Run with ``.venv/bin/python tests/test_pagekit.py`` or pytest."""
+"""Tests.  Run with ``.venv/bin/python tests/test_journalkit.py`` or pytest.
+
+The example journal in ``examples/journal`` doubles as the fixture project.
+"""
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+EXAMPLE = ROOT / "examples" / "journal"
 sys.path.insert(0, str(ROOT))
 
-from pagekit import spec  # noqa: E402
-from pagekit.geometry import Rect  # noqa: E402
-from pagekit.layout import layout_stack  # noqa: E402
-from pagekit.modules import build  # noqa: E402
-from pagekit.render import RenderContext, Renderer, resolve_placement  # noqa: E402
-from pagekit.units import mm, snap  # noqa: E402
+from journalkit import spec  # noqa: E402
+from journalkit.geometry import Rect  # noqa: E402
+from journalkit.layout import layout_stack  # noqa: E402
+from journalkit.modules import build  # noqa: E402
+from journalkit.render import RenderContext, Renderer, resolve_placement  # noqa: E402
+from journalkit.project import Project  # noqa: E402
+from journalkit.units import mm, snap  # noqa: E402
 
 
 def close(a, b, tol=0.01):
@@ -53,7 +59,7 @@ def _context(**overrides):
     redesign of the notebook would break tests that have nothing to do with
     the notebook.
     """
-    document = spec.load(ROOT / "templates" / "daily.yaml")
+    document = spec.load(EXAMPLE / "templates" / "daily.yaml")
     renderer = Renderer(document)
     page, content = renderer.content_rect(document.pages[0])
     defaults = dict(
@@ -206,13 +212,13 @@ def test_label_clearance_modes():
 
 
 def test_font_metrics_are_read_from_the_font():
-    from pagekit import fontmetrics
+    from journalkit import fontmetrics
 
     metrics = fontmetrics.load("Montserrat", 500)
     if metrics is None:
         return  # font not installed on this machine; the estimate path covers it
     assert metrics.units_per_em == 1000
-    # The value pagekit used to hard-code, now taken from the OS/2 table.
+    # The value journalkit used to hard-code, now taken from the OS/2 table.
     assert close(metrics.cap_ratio, 0.7, 0.001)
 
     size = mm("8pt")
@@ -226,7 +232,7 @@ def test_font_metrics_are_read_from_the_font():
 
 
 def test_unknown_font_falls_back_without_raising():
-    from pagekit import fontmetrics
+    from journalkit import fontmetrics
 
     assert fontmetrics.load("NoSuchFamilyXYZ", 400) is None
 
@@ -249,7 +255,7 @@ def test_dot_spacing_override_per_module():
 # --------------------------------------------------------------------------
 def test_ink_recolours_every_role():
     """One `ink` value stands behind stroke, text, dots and rules."""
-    from pagekit.theme import Theme
+    from journalkit.theme import Theme
 
     roles = ["stroke", "label.colour", "heading.colour", "dots.colour", "lines.colour"]
 
@@ -267,7 +273,7 @@ def test_ink_recolours_every_role():
 
 
 def test_theme_indirection_is_general_and_guards_cycles():
-    from pagekit.theme import Theme
+    from journalkit.theme import Theme
 
     theme = Theme({"accent": "#c00", "heading": {"colour": "$theme.accent"}})
     assert theme.get("heading.colour") == "#c00"
@@ -321,7 +327,7 @@ def test_back_page_is_mirrored():
     its margins, its grid, its page size — cannot break this test. Only the
     mirroring actually failing can.
     """
-    document = spec.load(ROOT / "templates" / "daily.yaml")
+    document = spec.load(EXAMPLE / "templates" / "daily.yaml")
     renderer = Renderer(document)
     _, front_content = renderer.content_rect(document.pages[0])
     _, back_content = renderer.content_rect(document.pages[1])
@@ -349,11 +355,12 @@ def test_back_page_is_mirrored():
     assert front_rule < front_content.x, "the rule sits in the binding margin"
 
 
-def test_custom_module_registers():
-    document = spec.load(ROOT / "templates" / "weekly.yaml")
-    from pagekit.modules import REGISTRY
+def test_habit_grid_is_built_in():
+    """The tracker needs no `modules:` key — it ships with journalkit."""
+    from journalkit.modules import REGISTRY
 
     assert "habit_grid" in REGISTRY
+    document = spec.load(EXAMPLE / "templates" / "weekly.yaml")
     pages = Renderer(document).render_all()
     assert len(pages) == 2
 
@@ -361,11 +368,96 @@ def test_custom_module_registers():
     # Derived from the document, so renaming a habit is not a test failure.
     grids = [m for page in document.pages for m in page.content
              if isinstance(m, dict) and m.get("type") == "habit_grid"]
-    assert grids, "weekly.yaml no longer exercises the custom module"
+    assert grids, "weekly.yaml no longer exercises the habit grid"
     named = [h for h in grids[0].get("habits", []) if h]
     assert named, "the habit grid has no named rows to check"
     for habit in named:
         assert habit in pages[0][1]
+
+
+# --------------------------------------------------------------------------
+def test_project_locate():
+    daily = EXAMPLE / "templates" / "daily.yaml"
+    assert Project.locate(EXAMPLE).root == EXAMPLE, "a directory is itself"
+    assert Project.locate(daily).root == EXAMPLE, "a file in templates/ climbs out of it"
+    assert Project.locate(ROOT / "pyproject.toml").root == ROOT, "a bare file: its directory"
+    assert Project.locate(EXAMPLE).templates() == sorted((EXAMPLE / "templates").glob("*.yaml"))
+
+
+def _scaffold(tmp: Path) -> Path:
+    from journalkit import cli
+
+    target = tmp.resolve() / "journal"
+    assert cli.cmd_init(argparse.Namespace(directory=str(target)), log=lambda _: None) == 0
+    return target
+
+
+def test_init_scaffolds_and_never_overwrites():
+    import tempfile
+    from journalkit import cli
+
+    with tempfile.TemporaryDirectory() as tmp:
+        target = _scaffold(Path(tmp))
+        assert (target / "templates" / "daily.yaml").is_file()
+        assert (target / "modules" / "stamp.py").is_file()
+        (target / "templates" / "daily.yaml").write_text("document: mine\n")
+        assert cli.cmd_init(argparse.Namespace(directory=str(target)), log=lambda _: None) == 0
+        assert (target / "templates" / "daily.yaml").read_text() == "document: mine\n"
+
+
+def test_project_modules_autoload():
+    """modules/*.py register their types with no `modules:` key in the YAML."""
+    import tempfile
+    from journalkit.modules import REGISTRY
+
+    with tempfile.TemporaryDirectory() as tmp:
+        target = _scaffold(Path(tmp))
+        loaded = Project(target).load_modules()
+        assert [p.name for p in loaded] == ["stamp.py"]
+        assert "stamp" in REGISTRY
+        # Loading again — a second document in the same process — must not
+        # trip the registry's duplicate check.
+        Project(target).load_modules()
+
+        document = spec.load(target / "templates" / "daily.yaml")
+        assert document.project.root == target
+        pages = Renderer(document).render_all()
+        assert any('stroke-dasharray' in svg for _, svg in pages), "the stamp drew its dashes"
+
+
+def test_packaged_icons_resolve_without_project_icons_dir():
+    """The example has no icons/; `icon: sunrise` must come from the package."""
+    assert not (EXAMPLE / "icons").exists()
+    document = spec.load(EXAMPLE / "templates" / "daily.yaml")
+    assert document.icon_dirs[-1] == spec.BUILTIN_ICONS
+    renderer = Renderer(document)
+    assert "sunrise" in renderer.icons.names()
+    icon = renderer.icons.get("sunrise")
+    assert icon.vw > 0 and icon.vh > 0
+
+
+def test_build_writes_into_project_out():
+    import tempfile
+    from journalkit import cli
+
+    with tempfile.TemporaryDirectory() as tmp:
+        target = _scaffold(Path(tmp))
+        assert cli.main(["build", str(target)]) == 0
+        written = sorted(p.name for p in (target / "out").glob("*.svg"))
+        assert written == ["daily-01-front.svg", "daily-02-back.svg"]
+        # -o redirects, and a single file works as a source too.
+        elsewhere = Path(tmp) / "elsewhere"
+        assert cli.main(["build", str(target / "templates" / "daily.yaml"), "-o", str(elsewhere)]) == 0
+        assert sorted(p.name for p in elsewhere.glob("*.svg")) == written
+
+
+def test_grid_check_passes_on_the_example():
+    from journalkit.checks import check_grid
+
+    lines = []
+    violations = check_grid(Project(EXAMPLE).templates(), out=lines.append)
+    assert violations == 0, "\n".join(lines)
+    assert any("placements checked" in line for line in lines)
 
 
 def test_repeat_expands_pages(tmp_path=None):

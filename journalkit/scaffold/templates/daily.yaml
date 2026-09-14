@@ -1,0 +1,87 @@
+# A one-day spread: recto and verso of a 105 × 170 mm page.
+#
+#   journalkit build --png        # renders this into out/
+#
+# All lengths are millimetres unless suffixed (0.25pt, 1in, 12px).
+
+document: daily
+
+page:
+  size: [105, 170]        # or a name: a5, a6, b6, pocket, half-letter …
+  margins:
+    top: 2.5
+    bottom: 7.5
+    inner: 15             # binding side; mirrors between recto and verso
+    outer: 5
+
+grid:
+  module: 2.5             # every module snaps to this
+  dots:
+    spacing: 5
+    origin: [0, 2.5]      # page-anchored, so dots line up across modules
+    radius: 0.125
+
+defaults:
+  gap: 2.5
+
+theme:
+  font: {family: Montserrat}
+  label: {size: 8pt, weight: 500}
+  heading: {size: 12pt, weight: 700}
+
+decorations:
+  - type: rule            # a hairline just inside the binding, on every page
+    edge: inner
+    offset: 5
+
+templates:
+
+  front:
+    side: right
+    content:
+      - type: fields
+        columns:
+          - {label: DATE, width: 25}
+          - {label: "LOC."}
+
+      - type: heading
+        text: MORNING
+        icon: sunrise             # built-in icons: sunrise, moon, mood-1 … mood-5
+
+      - type: rating
+        label: MOOD
+        icon: mood
+        count: 5
+        gap: 0
+
+      - type: box
+        label: NOTES
+        height: fill
+        dots: true
+
+      - type: checklist
+        rows: 3
+
+      - type: stamp                # from modules/stamp.py
+        label: TODAY IN ONE PICTURE
+        height: 40
+
+  back:
+    side: left
+    content:
+      - type: heading
+        text: EVENING
+        icon: moon
+
+      - type: lines
+        height: fill
+        label: REFLECTION
+
+      - type: box
+        label: GRATITUDE
+        height: 25
+        dots: true
+
+pages:
+  - template: front
+  - template: back

@@ -1,19 +1,43 @@
 [project]
-name = "pagekit"
-version = "0.1.0"
-description = "Structured page templates for a printable notebook"
+name = "journalkit"
+version = "0.2.0"
+description = "YAML page templates for a printable, hand-bound journal — laid out on a modular grid, rendered to print-ready SVG and PDF"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [{name = "Harris Bard Lapiroff"}]
 requires-python = ">=3.10"
 dependencies = ["pyyaml>=6.0"]
+keywords = ["journal", "notebook", "planner", "svg", "pdf", "print", "layout", "yaml"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Printing",
+]
+
+[project.urls]
+Homepage = "https://github.com/harrislapiroff/journalkit"
 
 [project.scripts]
-pagekit = "pagekit.cli:main"
-# Dev-task runner: doctor / build / watch / shot / preview / grid / geom /
-# fonts / test / clean / smoke.  Replaces what used to be a Makefile.
-pagekit-dev = "pagekit.dev:main"
+journalkit = "journalkit.cli:main"
 
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = ["pagekit", "pagekit.modules"]
+packages = ["journalkit", "journalkit.modules"]
+
+[tool.setuptools.package-data]
+# The built-in icons and the `journalkit init` scaffold travel with the wheel.
+journalkit = ["icons/*.svg", "scaffold/**/*"]
+
+[tool.setuptools.exclude-package-data]
+journalkit = ["**/__pycache__/*", "**/*.pyc"]

@@ -18,11 +18,11 @@ Adding a module type is one class and one decorator::
                         fill="none", stroke=self.stroke,
                         stroke_width=self.stroke_width, stroke_dasharray="1 1")
 
-Import the file from ``pagekit/modules/__init__.py`` and it is usable as
+Import the file from ``journalkit/modules/__init__.py`` and it is usable as
 ``type: stamp`` in YAML.
 
 Everything a module needs beyond its own spec comes from ``self.ctx``
-(:class:`pagekit.render.RenderContext`): the theme, the icon set, the page
+(:class:`journalkit.render.RenderContext`): the theme, the icon set, the page
 geometry and the page-wide dot lattice.
 """
 
@@ -35,11 +35,27 @@ from ..units import is_fill, mm
 REGISTRY: dict[str, type] = {}
 
 
+def is_builtin(cls) -> bool:
+    """Was this class defined inside the journalkit package itself?"""
+    return (cls.__module__ or "").startswith("journalkit.")
+
+
 def register(name: str):
+    """Class decorator: make ``type: <name>`` available in YAML.
+
+    A built-in name can never be taken over — a project module that tries to
+    redefine ``box`` is a mistake worth stopping. Two *project* files
+    registering the same name is different: it happens whenever two projects
+    are built in one process, so the later one simply replaces the earlier.
+    """
     def decorate(cls):
         cls.name = name
-        if name in REGISTRY:
-            raise ValueError("module type %r registered twice" % name)
+        existing = REGISTRY.get(name)
+        if existing is not None and existing is not cls:
+            if is_builtin(existing):
+                raise ValueError("module type %r is built in and cannot be redefined" % name)
+            if is_builtin(cls):
+                raise ValueError("module type %r registered twice" % name)
         REGISTRY[name] = cls
         return cls
 

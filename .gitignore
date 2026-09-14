@@ -1,5 +1,7 @@
 .venv/
 out/
+dist/
+build/
 .scratch/
 __pycache__/
 *.pyc

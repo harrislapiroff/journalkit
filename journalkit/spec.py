@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-import importlib.util
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
 
+from .project import Project, import_module_file
 from .theme import Theme
 from .units import mm
+
+#: Icons shipped with journalkit, searched after the project's own.
+BUILTIN_ICONS = Path(__file__).resolve().parent / "icons"
 
 #: Named page sizes, width x height in mm.
 PAGE_SIZES = {
@@ -125,6 +128,7 @@ class Document:
     pages: list[PageSpec]
     icon_dirs: list[Path]
     source: Path
+    project: Project | None = None
 
     @property
     def size(self):
@@ -132,27 +136,38 @@ class Document:
 
 
 def _load_extra_modules(paths, base: Path) -> None:
-    """Import user module files so their @register decorators run."""
-    for index, raw in enumerate(paths or []):
+    """Import module files a document lists under ``modules:``.
+
+    Relative paths are resolved against the document. The project's own
+    ``modules/`` directory is loaded without being listed; this is for the
+    one-off case of a file that lives somewhere else.
+    """
+    for raw in paths or []:
         path = (base / raw).resolve() if not Path(raw).is_absolute() else Path(raw)
         if not path.is_file():
             raise FileNotFoundError("modules: %s not found" % path)
-        spec = importlib.util.spec_from_file_location("pagekit_user_module_%d" % index, path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        import_module_file(path)
 
 
-def load(path: str | Path) -> Document:
+def load(path: str | Path, project: Project | None = None) -> Document:
+    """Read a YAML document into a :class:`Document`.
+
+    ``project`` is the directory whose ``modules/`` and ``icons/`` the
+    document may use; it is located from the file's position when omitted.
+    """
     path = Path(path).resolve()
+    if project is None:
+        project = Project.locate(path)
     try:
         data = yaml.safe_load(path.read_text()) or {}
     except yaml.YAMLError as exc:
         # A syntax error in a hand-written template is a user error, not a
-        # pagekit bug — report it like one instead of a traceback. This is the
-        # common case under `pagekit-dev watch`, which rebuilds mid-edit.
+        # journalkit bug — report it like one instead of a traceback. This is the
+        # common case under `journalkit watch`, which rebuilds mid-edit.
         raise ValueError("%s: %s" % (path.name, exc)) from None
     base = path.parent
 
+    project.load_modules()
     _load_extra_modules(data.get("modules"), base)
 
     page_data = data.get("page", {})
@@ -170,8 +185,10 @@ def load(path: str | Path) -> Document:
     defaults = data.get("defaults", {})
     default_gap = mm(defaults.get("gap", grid))
 
-    icon_dirs = [base / d for d in data.get("icons", ["icons"])]
-    icon_dirs.append(Path(__file__).resolve().parent.parent / "icons")
+    # Search order: directories the document names (relative to itself),
+    # then the project's icons/, then the set shipped with journalkit.
+    icon_dirs = [base / d for d in data.get("icons", []) or []]
+    icon_dirs += [project.icons_dir, BUILTIN_ICONS]
 
     templates = data.get("templates", {}) or {}
     pages: list[PageSpec] = []
@@ -222,4 +239,5 @@ def load(path: str | Path) -> Document:
         pages=pages,
         icon_dirs=icon_dirs,
         source=path,
+        project=project,
     )

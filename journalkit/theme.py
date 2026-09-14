@@ -28,7 +28,7 @@ DEFAULT_THEME = {
         # Fallback mean advance per character, used to estimate label widths
         # only when the font file cannot be read.  Real Montserrat capitals
         # range from 0.5em to over 0.9em, so this is a safety net, not a
-        # substitute for pagekit.fontmetrics.
+        # substitute for journalkit.fontmetrics.
         "avg_advance": 0.75,
     },
     "label": {

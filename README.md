@@ -1,108 +1,121 @@
-# pagekit
+# journalkit
 
-Structured page templates for a printable notebook. You describe a page as a
-list of modules in YAML; pagekit lays them out on a modular grid and renders
+Page templates for a printable, hand-bound journal. You describe each page as
+a list of modules in YAML — a dated header, a mood scale, a dotted notes box,
+a checklist — and journalkit lays them out on a modular grid and renders
 print-ready SVG and PDF.
 
+```sh
+pipx install journalkit
+journalkit init my-journal && cd my-journal
+journalkit build --pdf
 ```
-.venv/bin/pagekit build templates/daily.yaml --pdf
-```
 
-`templates/daily.yaml` is the daily-journal spread — 105 × 170 mm, 16 mm
-gutter, 0.25 pt rules, 4 mm dot grid on a 2 mm module grid. It began as a
-reproduction of the original Illustrator artwork (25 mm gutter, 5 mm dots) and
-has since been redrawn on the finer grid.
+Pure Python plus PyYAML. PDF and PNG export shell out to **Inkscape** (for
+font embedding) and, for multi-page documents, **Ghostscript**; SVG output
+needs neither.
 
-## Setup
+## Install
 
-Everything is declared in `pyproject.toml`; there is no Makefile.
+With [pipx](https://pipx.pypa.io/), straight from GitHub — no git needed,
+pip downloads the archive:
 
 ```sh
-poetry install
+pipx install https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
 ```
 
-`poetry.toml` pins the virtualenv to `./.venv`, which the rest of this repo
-assumes. Without Poetry, the same result in two stdlib commands:
+Upgrade the same way with `pipx install --force …`. To pin a release instead
+of following `main`, use a tag: `…/archive/refs/tags/v0.2.0.tar.gz`.
+
+Then the tools for PDF output, if you want it:
 
 ```sh
-python3 -m venv .venv
-.venv/bin/pip install -e .
+brew install --cask inkscape
+brew install ghostscript
 ```
 
-Either way you get PyYAML and two console scripts in `.venv/bin/`:
+Install the font your templates use system-wide — the starter project uses
+[Montserrat](https://fonts.google.com/specimen/Montserrat). Baselines are
+positioned from the font's cap height, and Inkscape substitutes a missing font
+*silently*, so `journalkit doctor` checks for it and `journalkit check`
+verifies the PDF afterwards.
 
-| script | purpose |
-|---|---|
-| `pagekit` | the renderer — `build`, `modules` |
-| `pagekit-dev` | dev tasks — `doctor`, `smoke`, `test`, `clean`, `watch`, `preview`, `grid`, `geom`, `fonts` |
+## A project
 
-Check your machine has everything (works before the venv exists):
+journalkit runs on a directory. `journalkit init` creates one:
+
+```
+my-journal/
+  templates/   one YAML document per printable thing (a spread, a section)
+  modules/     optional: Python files adding module types with @register
+  icons/       optional: SVG icons, looked up by stem before the built-ins
+  out/         what `journalkit build` writes
+```
+
+Every command takes zero or more sources — a project directory or a single
+YAML file — and defaults to the directory you are in:
 
 ```sh
-python3 -m pagekit.dev doctor
+journalkit build                      # every templates/*.yaml → out/*.svg
+journalkit build --pdf                # + one multi-page PDF per document
+journalkit build --png --dpi 150      # + a preview PNG per page
+journalkit build --debug --png        # overlay the module grid and margin box
+journalkit build --strict             # non-zero exit on any warning
+journalkit build templates/daily.yaml -o ~/Desktop/proofs
+
+journalkit watch --png                # rebuild on every save; ctrl-c to stop
+journalkit check                      # placements on the grid, fonts embedded
+journalkit modules                    # module types + parameters, yours included
+journalkit doctor                     # inkscape, ghostscript, fonts
 ```
 
-PDF export shells out to **Inkscape** (font embedding) and, for multi-page
-documents, **Ghostscript** (concatenation). SVG output has no dependencies
-beyond PyYAML.
-
-## Commands
+`preview` renders ad-hoc module YAML from stdin — the fastest way to try a
+module without writing a template:
 
 ```sh
-pagekit build templates/daily.yaml -o out          # SVG per page
-pagekit build templates/daily.yaml --pdf           # + one multi-page PDF
-pagekit build templates/daily.yaml --png --dpi 150 # + preview PNGs
-pagekit build templates/daily.yaml --debug --png   # overlay grid + margin box
-pagekit build templates/daily.yaml --strict        # non-zero exit on any warning
-pagekit modules                                    # list module types + params
-
-pagekit-dev smoke      # build + tests + grid + font checks, end to end
-pagekit-dev test       # the test suite
-pagekit-dev grid       # assert every module placement is on the 2.5mm grid
-pagekit-dev clean      # delete out/
+echo '- {type: box, label: HELLO, height: 20, dots: true}' | journalkit preview
+# → out/preview/preview-01-preview.png
 ```
 
-## Watching
+Warnings — a height snapped to the grid, content that overflows — go to stderr
+with exit code 0; `watch` prints them under the file that produced them, and
+`--strict` makes them fatal.
 
-`pagekit-dev watch` rebuilds SVG **and** PDF every time an input changes, and
-keeps going until you interrupt it:
+## A document
 
-```sh
-pagekit-dev watch                       # every templates/*.yaml → out/
-pagekit-dev watch templates/daily.yaml  # just one
-pagekit-dev watch --no-pdf              # SVG only, ~10x faster
-pagekit-dev watch --png --debug         # + preview PNGs with the grid overlay
+```yaml
+document: daily
+
+page:
+  size: [105, 170]                  # or a name: a5, a6, b6, pocket, half-letter …
+  margins: {top: 2.5, bottom: 7.5, inner: 15, outer: 5}
+
+grid:
+  module: 2.5                       # every module snaps to this
+  dots: {spacing: 5, origin: [0, 2.5], radius: 0.125}
+
+theme:
+  font: {family: Montserrat}
+
+templates:
+  front:
+    side: right
+    content:
+      - {type: fields, columns: [{label: DATE, width: 25}, {label: "LOC."}]}
+      - {type: heading, text: MORNING, icon: sunrise}
+      - {type: rating, label: MOOD, icon: mood, count: 5}
+      - {type: box, label: NOTES, height: fill, dots: true}
+      - {type: checklist, rows: 3}
+  back:
+    side: left
+    content:
+      - {type: lines, height: fill, label: REFLECTION}
+
+pages: [front, back]
 ```
 
-```
-watching templates, custom, icons, pagekit for changes → svg + pdf (out)
-ctrl-c to stop
-
-[18:19:58] initial build
-  daily.yaml         ok      3 file(s)   1.4s
-
-[18:20:11] daily.yaml
-  daily.yaml         ok      3 file(s)   1.3s
-      warning: daily-back: checklist: height 46.000mm snapped to 45.000mm
-```
-
-Templates are not the only input: the watcher also follows `pagekit/`,
-`icons/` and `custom/`, since a layout change or a re-extracted icon changes
-the output just as much. Editing a template rebuilds only that template;
-touching anything else rebuilds them all.
-
-Warnings are printed under the file that produced them — a build that "succeeds"
-while snapping a module to the grid is exactly what you want to see immediately.
-A broken template prints the error and the watcher keeps running, so fixing the
-YAML rebuilds it. PDF export runs Inkscape per page, so pass `--no-pdf` while
-iterating on layout and drop it when you want the real document.
-
-`pagekit-dev preview` renders ad-hoc module YAML from stdin — the fastest way
-to iterate on a module without writing a template file:
-
-```sh
-echo '- {type: box, label: HELLO, height: 20, dots: true}' | pagekit-dev preview
-```
+`examples/journal/` in this repository is a complete two-document project —
+the daily and weekly spreads this tool was written for, on a 2 mm grid.
 
 ## The two grids
 
@@ -146,11 +159,11 @@ them, and mirrored margins make that stricter than it looks:
 105 mm is 42 × 2.5, which is why the original design sat perfectly on a 2.5 mm
 grid. It is *not* a multiple of 2: on a 2 mm grid one of the two margins has
 to be odd, and that page's verso is unavoidably half a grid step off the
-lattice. `templates/daily.yaml` accepts this — its verso text block sits 1 mm
-off, so the dots inside it are 3 mm from the left border and 1 mm from the
+lattice. The example journal's `daily.yaml` accepts this — its verso text
+block sits 1 mm off, so the dots inside it are 3 mm from the left border and 1 mm from the
 right, where the recto's are 4 mm from both.
 
-`pagekit-dev grid` reports that as a per-page note rather than a failure, and
+`journalkit check` reports that as a per-page note rather than a failure, and
 checks module placements against the page's own offset — so it still catches
 the thing that is a bug (a module drifting off the grid) on a page that has
 knowingly given up the thing that is a choice.
@@ -175,7 +188,7 @@ theme:
 | `text` | clears only the label's own width, so dots continue to its right |
 | `none` | dots run underneath the label |
 
-`text` measures the label from the font file itself — `pagekit/fontmetrics.py`
+`text` measures the label from the font file itself — `journalkit/fontmetrics.py`
 is a small stdlib sfnt reader that pulls advance widths out of `hmtx`/`cmap`,
 so no font library is needed. If the font can't be found it falls back to a
 character-count estimate (`theme.font.avg_advance`), which is a safety net
@@ -265,7 +278,8 @@ its container's bottom edge. Nest `row` and `stack` freely:
 
 ## Modules
 
-Run `pagekit modules` for the full parameter list.
+Run `journalkit modules` for the full parameter list, including any types your
+project's `modules/` adds.
 
 | Type | What it draws |
 |---|---|
@@ -279,13 +293,16 @@ Run `pagekit modules` for the full parameter list.
 | `rule` | a single hairline |
 | `text` | a line of free text |
 | `spacer` | empty space; `height: fill` pushes what follows down |
+| `habit_grid` | habit tracker: one labelled row per habit, one marker per day |
 | `row`, `stack` | containers |
 
 ## Icons
 
-Icons are plain SVG files in `icons/`, referenced by filename stem
-(`icon: sunrise`). Requirements: the `viewBox` must be a *tight* bounding box
-of the artwork, and paths that should take the theme colour use
+Icons are plain SVG files referenced by filename stem (`icon: sunrise`). The
+built-in set — `sunrise`, `moon`, `mood-1` … `mood-5` — ships with journalkit;
+drop your own into your project's `icons/` and they take precedence.
+Requirements: the `viewBox` must be a *tight* bounding box of the artwork, and
+paths that should take the theme colour use
 `fill="currentColor"`. White fills are preserved as knockouts.
 
 To bring in artwork from Illustrator or anywhere else:
@@ -294,7 +311,7 @@ To bring in artwork from Illustrator or anywhere else:
 inkscape --pdf-poppler --export-type=svg --export-filename=raw.svg drawing.ai
 inkscape --export-id=path42 --export-id-only --export-area-drawing \
          --export-plain-svg --export-filename=raw/sunrise.svg raw.svg
-python3 tools/extract_icons.py raw/sunrise.svg -o icons/
+python3 tools/extract_icons.py raw/sunrise.svg -o my-journal/icons/
 ```
 
 `tools/extract_icons.py` computes the tight bounding box by flattening the path
@@ -303,7 +320,7 @@ data and rewrites fills to `currentColor`. The current set (`sunrise`, `moon`,
 
 ## Theme
 
-Deep-merged over the defaults in `pagekit/theme.py`. Anything can be overridden
+Deep-merged over the defaults in `journalkit/theme.py`. Anything can be overridden
 per document, per page (`theme:` on a template) or per module.
 
 ### Colour
@@ -355,7 +372,7 @@ One class, one decorator. `natural_height` gives the module an intrinsic size
 grid.
 
 ```python
-from pagekit.modules import Module, register
+from journalkit.modules import Module, register
 
 @register("stamp")
 class Stamp(Module):
@@ -373,38 +390,48 @@ class Stamp(Module):
         self.draw_dots(canvas, rect)   # honours `dots:` for free
 ```
 
-Point a document at the file and use it:
+Save that as `modules/stamp.py` in your project and `type: stamp` is available
+in every template there — every `.py` in `modules/` is imported before a
+build. A file that lives somewhere else can be listed in one document instead:
 
 ```yaml
-modules: [../custom/habits.py]
+modules: [../shared/stamp.py]
 ```
+
+`journalkit init` writes exactly this module into a new project as a worked
+example. A project module may not redefine a built-in name.
 
 Helpers available on `Module`: `self.opt(key, default)` (resolves
 `$theme.` references), `self.length(key)`, `self.stroke`, `self.stroke_width`,
 `self.text(...)`, `self.draw_label(...)`, `self.draw_dots(...)`,
 `self.draw_marker(...)` (the checkbox, centred in the rect you hand it),
 `self.cap_height()`, and `self.ctx` for the theme, icon set, page/content rects
-and the dot lattice. `custom/habits.py` is a worked example.
+and the dot lattice. `journalkit/modules/trackers.py` (the habit grid) is the
+shortest complete built-in.
 
 ## Layout of the repo
 
 ```
-pagekit/            the library
+journalkit/         the library — what `pipx install journalkit` ships
+  cli.py            build · watch · preview · check · modules · doctor · init
+  project.py        the project directory: templates/, modules/, icons/, out/
   units.py          lengths and grid snapping
   geometry.py       Rect
   spec.py           YAML -> document model
   layout.py         stack and row solving
   theme.py          defaults + deep merge
   icons.py          icon loading and placement
+  icons/            the built-in icon set (package data)
   fontmetrics.py    stdlib sfnt reader: advance widths + cap height
   svg.py            minimal SVG writer (1 user unit = 1 mm)
   render.py         page rendering, dot lattice, decorations
-  cli.py            build / modules
+  checks.py         the grid and font checks behind `journalkit check`
+  watch.py          rebuild-on-change and stdin preview
   modules/          module registry and the built-in library
-  dev.py            dev-task runner behind the `pagekit-dev` script
-templates/          notebook definitions (daily, weekly)
-custom/             example project-local module type
-icons/              icon library
-tools/              icon extraction helper
-tests/              run with `pagekit-dev test`
+  scaffold/         what `journalkit init` copies into a new project
+examples/journal/   the daily + weekly notebook this began as, as a project
+tools/
+  dev.py            repo-only tasks: test, smoke, clean, geom, ink, pages
+  extract_icons.py  icon extraction helper
+tests/              run with `.venv/bin/python tools/dev.py test`
 ```

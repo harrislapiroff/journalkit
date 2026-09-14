@@ -1,12 +1,9 @@
 # Weekly spread — exercises the parts the daily page doesn't: rows, ruled
-# lines, a bare dot field, and a project-local module type.
+# lines, and the built-in habit tracker.
 #
-#   ../.venv/bin/python -m pagekit build templates/weekly.yaml --pdf
+#   journalkit build examples/journal --pdf
 
 document: weekly
-
-modules:
-  - ../custom/habits.py      # registers `habit_grid`
 
 page:
   size: [95, 172]

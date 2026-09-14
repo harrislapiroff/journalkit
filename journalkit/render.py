@@ -1,4 +1,4 @@
-"""Turning a :class:`~pagekit.spec.Document` into SVG pages."""
+"""Turning a :class:`~journalkit.spec.Document` into SVG pages."""
 
 from __future__ import annotations
 

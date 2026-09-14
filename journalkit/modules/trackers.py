@@ -1,17 +1,12 @@
-"""Example of a project-local module type.
+"""Trackers: modules that lay out a lattice of markers to tick off.
 
-A YAML document picks this up with::
-
-    modules:
-      - ../custom/habits.py
-
-after which ``type: habit_grid`` is available.  This file is the whole story
-for adding a module: subclass, register, declare an intrinsic height, draw.
+``habit_grid`` began life as the project-local module in the example journal
+and is now part of the built-in library; it is still the shortest complete
+example of a module — subclass, register, declare an intrinsic height, draw.
 """
 
-from pagekit.geometry import Rect
-from pagekit.modules import Module, register
-from pagekit.units import mm
+from ..geometry import Rect
+from .base import Module, register
 
 
 @register("habit_grid")
