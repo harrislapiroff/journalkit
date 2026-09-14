@@ -29,8 +29,8 @@ Homepage = "https://github.com/harrislapiroff/journalkit"
 journalkit = "journalkit.cli:main"
 
 [dependency-groups]
-# `poetry install --with docs`, or `pip install mkdocs-material` by hand.
-docs = ["mkdocs-material>=9.5"]
+# `poetry install --with docs`, or `pip install zensical` by hand.
+docs = ["zensical>=0.0.60"]
 
 [build-system]
 requires = ["setuptools>=77"]

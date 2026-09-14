@@ -225,9 +225,9 @@ Read the PNG: the `sunrise` icon proves package data shipped; the dashed
 ## Docs
 
 ```bash
-.venv/bin/pip install "mkdocs-material>=9.5"   # or: poetry install --with docs
-.venv/bin/mkdocs build --strict                # must be warning-free
-.venv/bin/mkdocs serve                         # http://127.0.0.1:8000, live reload
+.venv/bin/pip install zensical                 # or: poetry install --with docs
+.venv/bin/zensical build --strict --clean      # must report "No issues found"
+.venv/bin/zensical serve                       # http://localhost:8000, live reload
 ```
 
 `docs/` follows Diátaxis: `tutorial/`, `guide/`, `reference/`,

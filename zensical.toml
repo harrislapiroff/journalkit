@@ -1,0 +1,124 @@
+# Documentation site — built with Zensical (https://zensical.org).
+#
+#   .venv/bin/zensical serve          # http://localhost:8000, live reload
+#   .venv/bin/zensical build --strict # what the Pages workflow runs
+#
+# Sources live in docs/, laid out on Diátaxis: tutorial / guide / reference /
+# explanation.
+
+[project]
+site_name = "journalkit"
+site_description = "YAML page templates for a printable, hand-bound journal, rendered to print-ready SVG and PDF."
+site_url = "https://harrislapiroff.github.io/journalkit/"
+site_author = "Harris Bard Lapiroff"
+copyright = "BSD 3-Clause License"
+
+repo_url = "https://github.com/harrislapiroff/journalkit"
+repo_name = "harrislapiroff/journalkit"
+edit_uri = "edit/main/docs/"
+
+nav = [
+  { "Home" = "index.md" },
+  { "Tutorial" = [
+    "tutorial/index.md",
+    { "Install" = "tutorial/install.md" },
+    { "Your first journal" = "tutorial/first-journal.md" },
+    { "Add a page" = "tutorial/add-a-page.md" },
+    { "Write a module" = "tutorial/write-a-module.md" },
+  ] },
+  { "Guides" = [
+    "guide/index.md",
+    { "Choosing a page and grid" = "guide/page-and-grid.md" },
+    { "Laying out a page" = "guide/layout.md" },
+    { "Theming" = "guide/theming.md" },
+    { "Icons" = "guide/icons.md" },
+    { "Decorations" = "guide/decorations.md" },
+    { "Custom modules" = "guide/custom-modules.md" },
+    { "Iterating with watch and preview" = "guide/iterating.md" },
+    { "Printing and checking" = "guide/printing.md" },
+  ] },
+  { "Reference" = [
+    "reference/index.md",
+    { "Command line" = "reference/cli.md" },
+    { "Document format" = "reference/document.md" },
+    { "Modules" = "reference/modules.md" },
+    { "Theme" = "reference/theme.md" },
+    { "Units and page sizes" = "reference/units.md" },
+    { "Project directory" = "reference/project.md" },
+    { "Python API" = "reference/python-api.md" },
+  ] },
+  { "Explanation" = [
+    "explanation/index.md",
+    { "The two grids" = "explanation/two-grids.md" },
+    { "Mirroring" = "explanation/mirroring.md" },
+    { "Fonts and baselines" = "explanation/fonts.md" },
+    { "Dots and labels" = "explanation/dots-and-labels.md" },
+    { "Design principles" = "explanation/principles.md" },
+  ] },
+]
+
+[project.theme]
+language = "en"
+features = [
+  "content.action.edit",
+  "content.code.annotate",
+  "content.code.copy",
+  "content.tabs.link",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.instant",
+  "navigation.instant.prefetch",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.tabs",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+  "search.suggest",
+  "toc.follow",
+]
+
+[project.theme.icon]
+logo = "lucide/notebook-pen"
+repo = "fontawesome/brands/github"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[[project.extra.social]]
+icon = "fontawesome/brands/github"
+link = "https://github.com/harrislapiroff/journalkit"
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+def_list = {}
+footnotes = {}
+md_in_html = {}
+tables = {}
+toc.permalink = true
+pymdownx.details = {}
+pymdownx.emoji.emoji_generator = "zensical.extensions.emoji.to_svg"
+pymdownx.emoji.emoji_index = "zensical.extensions.emoji.twemoji"
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.snippets = {}
+pymdownx.superfences = {}
+pymdownx.tabbed.alternate_style = true
+pymdownx.tabbed.combine_header_slug = true

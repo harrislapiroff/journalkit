@@ -437,5 +437,5 @@ tools/
   dev.py            repo-only tasks: test, smoke, clean, geom, ink, pages
   extract_icons.py  icon extraction helper
 tests/              run with `.venv/bin/python tools/dev.py test`
-docs/ + mkdocs.yml  the documentation site (MkDocs Material); `mkdocs serve`
+docs/ + zensical.toml  the documentation site (Zensical); `zensical serve`
 ```
