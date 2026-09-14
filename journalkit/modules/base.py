@@ -261,10 +261,10 @@ class Module:
             The label then sits in a clean strip with the grid starting below
             it — which reads as deliberate, and needs no font metrics.
         ``text``
-            Only as wide as the label is estimated to be, so dots continue to
-            the right of a short label.  The width is approximated from the
-            character count (see ``theme.font.avg_advance``), so it is padded
-            generously rather than measured.
+            Only as wide as the label, so dots continue to the right of a
+            short one.  The width is measured from the font file when it can
+            be found, and estimated from the character count otherwise (see
+            ``theme.font.avg_advance``).
         """
         text = self.opt("label") if text is None else text
         if not text:

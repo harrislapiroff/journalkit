@@ -222,6 +222,19 @@ cd "$(mktemp -d)" && journalkit init && journalkit build --png --dpi 110 && jour
 Read the PNG: the `sunrise` icon proves package data shipped; the dashed
 `stamp` frame proves `modules/` auto-loading works from an installed wheel.
 
+## Docs
+
+```bash
+.venv/bin/pip install "mkdocs-material>=9.5"   # or: poetry install --with docs
+.venv/bin/mkdocs build --strict                # must be warning-free
+.venv/bin/mkdocs serve                         # http://127.0.0.1:8000, live reload
+```
+
+`docs/` follows Diátaxis: `tutorial/`, `guide/`, `reference/`,
+`explanation/`. The reference pages mirror the code — `reference/modules.md`
+must agree with `journalkit modules`, `reference/theme.md` with
+`journalkit/theme.py`, `reference/cli.md` with `journalkit --help`.
+
 ## Test
 
 ```bash

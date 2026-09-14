@@ -85,5 +85,9 @@ To drive, screenshot, or verify the renderer, use the `run-journalkit` skill
 - Warnings (off-grid snapping, overflow) go to stderr with exit code 0; `--strict`
   makes them fatal. Only sizes written in a template warn — a module's intrinsic
   height is snapped silently, since no template could act on it.
-- Anything a user needs to know goes in `README.md`; anything only the
-  checkout needs goes here or in the skill.
+- Anything a user needs to know goes in `docs/` (MkDocs Material, Diátaxis
+  layout: tutorial / guide / reference / explanation), with `README.md` as
+  the short version; anything only the checkout needs goes here or in the
+  skill. `.venv/bin/mkdocs build --strict` must pass; the Pages workflow runs
+  it on push. When a module, CLI flag or theme key changes, the matching
+  reference page changes in the same commit.

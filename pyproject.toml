@@ -28,6 +28,10 @@ Homepage = "https://github.com/harrislapiroff/journalkit"
 [project.scripts]
 journalkit = "journalkit.cli:main"
 
+[dependency-groups]
+# `poetry install --with docs`, or `pip install mkdocs-material` by hand.
+docs = ["mkdocs-material>=9.5"]
+
 [build-system]
 requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"

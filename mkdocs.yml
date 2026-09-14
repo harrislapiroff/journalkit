@@ -1,0 +1,96 @@
+site_name: journalkit
+site_description: YAML page templates for a printable, hand-bound journal, rendered to print-ready SVG and PDF.
+site_url: https://harrislapiroff.github.io/journalkit/
+repo_url: https://github.com/harrislapiroff/journalkit
+repo_name: harrislapiroff/journalkit
+edit_uri: edit/main/docs/
+copyright: BSD 3-Clause License
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Tutorial:
+      - tutorial/index.md
+      - Install: tutorial/install.md
+      - Your first journal: tutorial/first-journal.md
+      - Add a page: tutorial/add-a-page.md
+      - Write a module: tutorial/write-a-module.md
+  - Guides:
+      - guide/index.md
+      - Choosing a page and grid: guide/page-and-grid.md
+      - Laying out a page: guide/layout.md
+      - Theming: guide/theming.md
+      - Icons: guide/icons.md
+      - Decorations: guide/decorations.md
+      - Custom modules: guide/custom-modules.md
+      - Iterating with watch and preview: guide/iterating.md
+      - Printing and checking: guide/printing.md
+  - Reference:
+      - reference/index.md
+      - Command line: reference/cli.md
+      - Document format: reference/document.md
+      - Modules: reference/modules.md
+      - Theme: reference/theme.md
+      - Units and page sizes: reference/units.md
+      - Project directory: reference/project.md
+      - Python API: reference/python-api.md
+  - Explanation:
+      - explanation/index.md
+      - The two grids: explanation/two-grids.md
+      - Mirroring: explanation/mirroring.md
+      - Fonts and baselines: explanation/fonts.md
+      - Dots and labels: explanation/dots-and-labels.md
+      - Design principles: explanation/principles.md

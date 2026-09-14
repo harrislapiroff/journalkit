@@ -20,7 +20,9 @@
       "Bash(.venv/bin/python tools/dev.py ink *)",
       "Bash(.venv/bin/python tools/dev.py ink)",
       "Bash(.venv/bin/python tools/dev.py pages *)",
-      "Bash(python3 tools/dev.py doctor)"
+      "Bash(python3 tools/dev.py doctor)",
+      "Bash(.venv/bin/mkdocs build *)",
+      "Bash(.venv/bin/mkdocs build)"
     ]
   }
 }

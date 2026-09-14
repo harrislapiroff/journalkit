@@ -15,6 +15,10 @@ Pure Python plus PyYAML. PDF and PNG export shell out to **Inkscape** (for
 font embedding) and, for multi-page documents, **Ghostscript**; SVG output
 needs neither.
 
+**Documentation: <https://harrislapiroff.github.io/journalkit/>** — a
+tutorial, task guides, the full reference, and the reasoning behind the
+design. This README is the short version.
+
 ## Install
 
 With [pipx](https://pipx.pypa.io/), straight from GitHub — no git needed,
@@ -433,4 +437,5 @@ tools/
   dev.py            repo-only tasks: test, smoke, clean, geom, ink, pages
   extract_icons.py  icon extraction helper
 tests/              run with `.venv/bin/python tools/dev.py test`
+docs/ + mkdocs.yml  the documentation site (MkDocs Material); `mkdocs serve`
 ```
