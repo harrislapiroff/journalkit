@@ -1,12 +1,12 @@
 # journalkit
 
 Page templates for a printable, hand-bound journal. You describe each page as
-a list of modules in YAML — a dated header, a mood scale, a dotted notes box,
+a list of modules in YAML — a dated header, a rating scale, a dotted notes box,
 a checklist — and journalkit lays them out on a modular grid and renders
 print-ready SVG and PDF.
 
 ```sh
-pipx install journalkit
+pipx install https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
 journalkit init my-journal && cd my-journal
 journalkit build --pdf
 ```
@@ -34,11 +34,12 @@ brew install --cask inkscape
 brew install ghostscript
 ```
 
-Install the font your templates use system-wide — the starter project uses
-[Montserrat](https://fonts.google.com/specimen/Montserrat). Baselines are
-positioned from the font's cap height, and Inkscape substitutes a missing font
-*silently*, so `journalkit doctor` checks for it and `journalkit check`
-verifies the PDF afterwards.
+Install the font your templates use system-wide. The default theme and the
+starter project use [Montserrat](https://fonts.google.com/specimen/Montserrat);
+set `theme.font.family` to use anything else. Baselines are positioned from
+the font's cap height, and Inkscape substitutes a missing font *silently*, so
+`journalkit doctor` checks for it and `journalkit check` verifies the PDF
+afterwards.
 
 ## A project
 
@@ -114,8 +115,8 @@ templates:
 pages: [front, back]
 ```
 
-`examples/journal/` in this repository is a complete two-document project —
-the daily and weekly spreads this tool was written for, on a 2 mm grid.
+`examples/journal/` in this repository is a complete project with two
+documents, and `journalkit init` writes a smaller one to start from.
 
 ## The two grids
 
@@ -156,17 +157,16 @@ them, and mirrored margins make that stricter than it looks:
 * the block's width is `page − inner − outer`, so the **page dimension** must
   be a multiple of the grid as well.
 
-105 mm is 42 × 2.5, which is why the original design sat perfectly on a 2.5 mm
-grid. It is *not* a multiple of 2: on a 2 mm grid one of the two margins has
-to be odd, and that page's verso is unavoidably half a grid step off the
-lattice. The example journal's `daily.yaml` accepts this — its verso text
-block sits 1 mm off, so the dots inside it are 3 mm from the left border and 1 mm from the
-right, where the recto's are 4 mm from both.
+Check the arithmetic before choosing a grid. A 105 mm page is 42 × 2.5, so it
+sits perfectly on a 2.5 mm grid; it is *not* a multiple of 2, so on a 2 mm
+grid one of the two margins has to be odd and the verso is unavoidably half a
+grid step off the lattice. You can accept that — the dots on a verso will then
+sit 1 mm closer to one border than to the other — but it should be a choice.
 
-`journalkit check` reports that as a per-page note rather than a failure, and
-checks module placements against the page's own offset — so it still catches
-the thing that is a bug (a module drifting off the grid) on a page that has
-knowingly given up the thing that is a choice.
+`journalkit check` reports such a page as a per-page note rather than a
+failure, and checks module placements against the page's own offset — so it
+still catches the thing that is a bug (a module drifting off the grid) on a
+page that has knowingly given up the thing that is a choice.
 
 ### Dots and labels
 
@@ -192,14 +192,12 @@ theme:
 is a small stdlib sfnt reader that pulls advance widths out of `hmtx`/`cmap`,
 so no font library is needed. If the font can't be found it falls back to a
 character-count estimate (`theme.font.avg_advance`), which is a safety net
-only: real Montserrat capitals range from 0.5em to over 0.9em, so the estimate
-under-reserves for wide words like `MOOD` and over-reserves badly for long
-ones.
+only: capitals in a typical sans range from 0.5em to over 0.9em, so the
+estimate under-reserves for wide words and over-reserves for long ones.
 
 The same reader supplies the cap height. `theme.font.cap_height` is null by
-default, meaning "read `OS/2` from the font" — Montserrat publishes 0.700,
-which is what the value used to be hard-coded to. Set it explicitly to
-override.
+default, meaning "read `OS/2` from the font"; set it explicitly to override,
+or to compensate for a font that publishes no cap height (the fallback is 0.7).
 
 ## Page geometry and mirroring
 
@@ -315,8 +313,8 @@ python3 tools/extract_icons.py raw/sunrise.svg -o my-journal/icons/
 ```
 
 `tools/extract_icons.py` computes the tight bounding box by flattening the path
-data and rewrites fills to `currentColor`. The current set (`sunrise`, `moon`,
-`mood-1`…`mood-5`) was extracted from `Journal.ai` this way.
+data and rewrites fills to `currentColor`. The built-in set was produced this
+way from an Illustrator file, so it is a fair template for your own.
 
 ## Theme
 
@@ -343,7 +341,8 @@ theme:
   dots: {colour: "#999"}
 ```
 
-The default `ink` is `#231F20`, the rich black of the original artwork.
+The default `ink` is `#231F20`, a rich black that prints a little softer than
+`#000`.
 Knockouts (the page background, the white fill behind a checklist marker) are
 deliberately not themed — they have to stay white to mask what is under them.
 
@@ -429,7 +428,7 @@ journalkit/         the library — what `pipx install journalkit` ships
   watch.py          rebuild-on-change and stdin preview
   modules/          module registry and the built-in library
   scaffold/         what `journalkit init` copies into a new project
-examples/journal/   the daily + weekly notebook this began as, as a project
+examples/journal/   a complete two-document project, also the test fixture
 tools/
   dev.py            repo-only tasks: test, smoke, clean, geom, ink, pages
   extract_icons.py  icon extraction helper
