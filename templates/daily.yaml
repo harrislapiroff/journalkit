@@ -8,7 +8,7 @@
 document: daily
 
 page:
-  size: [105, 170]
+  size: [95, 172]
   # Every margin is an even number: the module grid is 2mm and is anchored to
   # the page, so an odd margin would put the whole text block off-grid.
   margins:
@@ -110,10 +110,11 @@ templates:
 
       # Footer nudge to keep the weekly spread in sync with the dailies.
       - type: text
-        text: "Don't forget to update the weekly page!"
+        text: "DON’T FORGET TO UPDATE YOUR WEEKLIES"
         align: center
-        size: 6pt
-        weight: 500
+        size: 8pt
+        gap: 8
+        weight: 400
 
   daily-back:
     side: left

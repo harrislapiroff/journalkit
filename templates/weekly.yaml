@@ -9,7 +9,7 @@ modules:
   - ../custom/habits.py      # registers `habit_grid`
 
 page:
-  size: [105, 170]
+  size: [95, 172]
   # Even margins, to match the 2mm module grid — see the note in daily.yaml.
   margins: {top: 2, bottom: 8, inner: 16, outer: 5}
 
@@ -69,13 +69,13 @@ templates:
             gap_between: 2
             content:
               - {type: box, label: MON, height: fill}
-              - {type: box, label: TUE, height: fill}
               - {type: box, label: WED, height: fill}
+              - {type: box, label: FRI, height: fill}
           - type: stack
             gap_between: 2
             content:
+              - {type: box, label: TUE, height: fill}
               - {type: box, label: THU, height: fill}
-              - {type: box, label: FRI, height: fill}
               - {type: box, label: "SAT / SUN", height: fill}
 
   week-notes:
