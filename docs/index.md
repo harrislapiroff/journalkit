@@ -59,7 +59,6 @@ your own SVG icons.
 
 Python 3.10 or newer. PDF and PNG output use [Inkscape](https://inkscape.org),
 and multi-page PDFs also use [Ghostscript](https://ghostscript.com); SVG
-output needs neither. Text is drawn with a bundled font, so there is nothing
-to install for that.
+output needs neither.
 
 BSD 3-Clause License.
