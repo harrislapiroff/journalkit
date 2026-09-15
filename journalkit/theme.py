@@ -14,7 +14,7 @@ from .units import mm
 DEFAULT_THEME = {
     # The one colour everything else points at.  Override `ink` to recolour a
     # whole document; override any individual role below to pin just that one.
-    # #231F20 is the rich black of the original artwork; "#000" is pure black.
+    # #231F20 is a rich black that prints a little softer than "#000".
     "ink": "#231F20",
     "stroke": "$theme.ink",
     "stroke_width": "0.25pt",
@@ -65,8 +65,8 @@ DEFAULT_THEME = {
         "reserve_label": "band",
         "label_pad": 0.75,
     },
-    # The checkbox, shared by every module that draws one — the daily's
-    # checklist and the weekly's habit grid tick the same shape.
+    # The checkbox, shared by every module that draws one (checklist,
+    # habit_grid), so a habit is ticked the same way as a task.
     "marker": {
         "shape": "circle-slash",   # circle-slash | circle | square | none | icon:<name>
         "size": 5.0,

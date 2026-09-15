@@ -46,10 +46,9 @@ white.
 
 ## Fonts
 
-Text is drawn as glyph outlines read from the font file, so nothing needs
-to be installed for the default. Montserrat Regular, Medium and Bold ship
-with journalkit (SIL Open Font License), and the default theme uses weights
-500 and 700.
+Text is drawn as glyph outlines read from the font file. Montserrat
+Regular, Medium and Bold ship with journalkit (SIL Open Font License); the
+default theme uses weights 500 and 700.
 
 To use another font, name it and have it installed on the machine that
 builds:

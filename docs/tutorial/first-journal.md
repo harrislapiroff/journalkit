@@ -130,9 +130,6 @@ daily.pdf                    text outlined, no fonts embedded
 fonts ok
 ```
 
-Text is drawn as outlines from a font bundled with journalkit, so the PDF
-embeds no fonts and looks the same on any machine.
-
 <figure markdown>
 ![A printed daily page in a ring binder](../assets/photos/daily-front.jpg){ width="280" }
 ![Its verso](../assets/photos/daily-back.jpg){ width="280" }

@@ -50,9 +50,8 @@ templates:
       - type: habit_grid
         headers: [M, T, W, T, F, S, S]
         habits: [Fill move ring, Read 5 pages, "", "", ""]
-        # 42mm of gutter leaves 6mm columns for the seven days, so the marker
-        # lattice is as tight horizontally as the 4mm row + 2mm gap makes it
-        # vertically — and the write-your-own rules get the width back.
+        # A wide label gutter keeps the seven day columns tight and gives the
+        # write-your-own rules room.
         label_width: 42
         row_height: 4
 

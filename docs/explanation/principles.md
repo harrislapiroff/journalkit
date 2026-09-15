@@ -20,8 +20,8 @@ right when the content rectangle is computed. No module branches on the
 side.
 
 **Text is drawn from the font file.** Glyph outlines, cap heights and
-advance widths are read directly; the default font is bundled, and the
-output depends on nothing installed.
+advance widths are read directly, so the output does not depend on the
+machine that renders it.
 
 **Dots are dropped, never shifted.** Where a dot would collide with a label
 it is omitted; the survivors stay on the lattice.
@@ -37,10 +37,3 @@ author wrote are worth warning about; intrinsic sizes snap silently.
 **A template is written once.** It works on a recto and a verso, in any
 project, with any theme.
 
-**Assert properties, not coordinates.** The tests and `check` derive every
-figure from the document. A redesign changes the output without breaking
-them.
-
-**The library never assumes a checkout.** Built-in icons and the scaffold
-are package data; everything else comes from the project directory. If it
-works from `pipx install`, it works.

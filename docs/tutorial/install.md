@@ -57,7 +57,7 @@ tools (only needed for --pdf and --png):
   ok   inkscape  /opt/homebrew/bin/inkscape
   ok   gs        /opt/homebrew/bin/gs
 fonts:
-  ok   Montserrat (bundled with journalkit) — text will be outlined, nothing to install
+  ok   Montserrat (bundled with journalkit)
 project:
   FAIL /Users/you has no templates/ — run `journalkit init` to start one
 

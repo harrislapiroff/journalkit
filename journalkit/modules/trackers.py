@@ -1,8 +1,7 @@
 """Trackers: modules that lay out a lattice of markers to tick off.
 
-``habit_grid`` began life as the project-local module in the example journal
-and is now part of the built-in library; it is still the shortest complete
-example of a module — subclass, register, declare an intrinsic height, draw.
+``habit_grid`` is also the shortest complete example of a module: subclass,
+register, declare an intrinsic height, draw.
 """
 
 from ..geometry import Rect
@@ -13,8 +12,8 @@ from .base import Module, register
 class HabitGrid(Module):
     """A habit tracker: one labelled row per habit, one checkbox per day.
 
-    The checkbox is the same marker the daily's ``checklist`` ticks — drawn by
-    ``Module.draw_marker`` — so a habit is crossed off exactly like a task.
+    The checkbox is the same marker ``checklist`` draws, via
+    ``Module.draw_marker``, so a habit is crossed off exactly like a task.
     """
 
     params = {

@@ -25,7 +25,7 @@ defaults:
   gap: 2.5
 
 theme:
-  font: {family: Montserrat}     # bundled with journalkit; nothing to install
+  font: {family: Montserrat}
   label: {size: 8pt, weight: 500}
   heading: {size: 12pt, weight: 700}
 

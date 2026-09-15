@@ -424,7 +424,7 @@ journalkit/         the library — what `pipx install journalkit` ships
   watch.py          rebuild-on-change and stdin preview
   modules/          module registry and the built-in library
   scaffold/         what `journalkit init` copies into a new project
-examples/journal/   a complete two-document project, also the test fixture
+examples/journal/   a complete two-document project
 tools/
   dev.py            repo-only tasks: test, smoke, clean, geom, ink, pages
   extract_icons.py  icon extraction helper

@@ -16,7 +16,7 @@ Two entry points, and the split matters:
   geometry measurement. Never installed for users.
 
 All paths below are relative to the project root (the directory holding
-`pyproject.toml`). Verified on macOS / arm64 / Python 3.12 / Inkscape 1.3.2.
+`pyproject.toml`).
 
 ## Prerequisites
 
@@ -239,7 +239,7 @@ must agree with `journalkit modules`, `reference/theme.md` with
 
 ```bash
 .venv/bin/python tools/dev.py test
-# → 33 "ok" lines, then: all tests passed     (~1s)
+# → one "ok" line per test, then: all tests passed     (~1s)
 ```
 
 The suite renders in memory; the only files it writes are scaffolded

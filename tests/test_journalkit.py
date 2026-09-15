@@ -259,7 +259,7 @@ def test_font_metrics_are_read_from_the_font():
     metrics = fontmetrics.load("Montserrat", 500)
     assert metrics is not None, "bundled, so always present"
     assert metrics.units_per_em == 1000
-    # The value journalkit used to hard-code, now taken from the OS/2 table.
+    # Montserrat's published cap height, from the OS/2 table.
     assert close(metrics.cap_ratio, 0.7, 0.001)
 
     size = mm("8pt")
@@ -411,7 +411,7 @@ def test_habit_grid_is_built_in():
     # Derived from the document, so renaming a habit is not a test failure.
     grids = [m for page in document.pages for m in page.content
              if isinstance(m, dict) and m.get("type") == "habit_grid"]
-    assert grids, "weekly.yaml no longer exercises the habit grid"
+    assert grids, "weekly.yaml has no habit grid to check"
     named = [h for h in grids[0].get("habits", []) if h]
     assert named, "the habit grid has no named rows to check"
     for habit in named:

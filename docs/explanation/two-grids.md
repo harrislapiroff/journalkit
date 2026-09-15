@@ -74,4 +74,4 @@ content rectangle off the lattice is the template author's choice, reported
 as a note. A module placement off *its own content rectangle* is the layout
 engine failing, reported as a failure. Checking placements relative to the
 page's own offset is what keeps the second check meaningful on a page that
-has given up the first. Do not "fix" the note by loosening the check.
+has given up the first.

@@ -38,8 +38,7 @@ wide for narrow ones.
 
 The band runs from `label_pad` above the cap height to `label_pad` below the
 baseline, or a little further to allow for descenders. A label that already
-clears the first dot row costs no dots at all — the test suite asserts this
-— so a theme with a slightly larger `label.dy` may lose nothing.
+clears the first dot row costs no dots at all.
 
 ## Multi-cell modules
 

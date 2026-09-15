@@ -61,8 +61,3 @@ things that must not mirror.
 
 - One template per page design.
 - Mirroring cannot be half-applied; there is no second place it happens.
-- The test suite renders a recto and a
-  verso from the same template and asserts the content rectangles are
-  reflections, deriving every number from the document rather than pinning
-  coordinates — so a redesign of the page changes the output without
-  breaking the test.

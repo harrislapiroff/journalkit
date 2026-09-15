@@ -208,7 +208,7 @@ def _font_status(family: str) -> tuple[bool, str]:
                        "Montserrat, which ships with journalkit" % family)
     where = "bundled with journalkit" if BUNDLED_FONTS in metrics.path.parents else str(metrics.path)
     if metrics.has_outlines:
-        return True, "%s (%s) — text will be outlined, nothing to install" % (family, where)
+        return True, "%s (%s)" % (family, where)
     return True, ("%s (%s) — no TrueType outlines, so text is set by Inkscape: "
                   "keep the font installed on the machine that builds the PDF" % (family, where))
 

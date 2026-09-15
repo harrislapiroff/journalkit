@@ -29,10 +29,9 @@ Two layers, deliberately:
 - **`tools/dev.py`** is for working on the repo: `test`, `smoke`, `clean`,
   and the measurement tools `geom`, `ink`, `pages`. pipx never installs it.
 
-`examples/journal/` is the notebook this started as, kept as a real project
-so the tests and smoke run exercise both grids, mirroring, the habit tracker
-and the packaged icons. Its templates are the test fixtures — keep them
-building.
+`examples/journal/` is a real two-document project that the tests and smoke
+run exercise (both grids, mirroring, the habit tracker, packaged icons). Its
+templates are the test fixtures — keep them building.
 
 To drive, screenshot, or verify the renderer, use the `run-journalkit` skill
 (`.claude/skills/run-journalkit/SKILL.md`).

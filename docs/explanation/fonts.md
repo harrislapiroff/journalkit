@@ -4,15 +4,12 @@
 
 journalkit reads glyph outlines from the font file and writes each label as
 an SVG `<path>`. The SVG and the PDF contain no fonts and no text, only
-shapes. This is why a project needs no font installed: Montserrat Regular,
-Medium and Bold are bundled with the package, and the output is the same on
-every machine.
+shapes, so the output is the same on every machine.
 
-The alternative, emitting SVG `<text>` and letting Inkscape set it, has a
-failure mode that is easy to miss. If the font is not installed, Inkscape
-substitutes another, prints nothing, and exits 0. The PDF looks fine at a
-glance, but journalkit placed every baseline using the intended font's
-metrics, so every label is slightly off. Outlining removes the possibility.
+The alternative, emitting SVG `<text>` and letting Inkscape set it, depends
+on Inkscape finding the same font journalkit measured. If it does not, it
+substitutes another without saying so, and every baseline is slightly off.
+Outlining removes the possibility.
 
 ## Baselines come from the cap height
 

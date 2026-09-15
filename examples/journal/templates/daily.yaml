@@ -1,5 +1,4 @@
-# Daily journal spread. Started as a reproduction of the original Illustrator
-# design (25mm gutter, 2.5/5mm grids) and was redrawn on a 2/4mm grid.
+# Daily journal spread: a recto and a verso on a 2 mm grid with 4 mm dots.
 #
 #   journalkit build examples/journal --pdf
 #
@@ -15,7 +14,7 @@ page:
     top: 2
     bottom: 8
     inner: 16      # binding side — enough to clear the stitching
-    outer: 5       # odd, so that 105 - 16 - 5 = 84 is even
+    outer: 5       # odd, so that the text block width (95 - 16 - 5) is even
 
 grid:
   module: 2        # every module snaps to this
@@ -58,8 +57,8 @@ templates:
       - type: fields
         height: 6
         columns:
-          - {label: DATE, width: 28}   # a third of the 84mm block
-          - {label: "LOC."}            # takes the remaining 56mm
+          - {label: DATE, width: 28}
+          - {label: "LOC."}            # takes the rest
 
       # Blank line for the day's theme or title — "First day in Spain!".
       # Unlabelled on purpose: it is one writing line, matching the row above.
