@@ -32,9 +32,9 @@ wrote /…/my-journal/out/daily-01-front.png
 wrote /…/my-journal/out/daily-02-back.png
 ```
 
-<figure markdown>
-![The starter project's front page](../assets/screens/starter-front.png){ width="280" }
-![The starter project's back page](../assets/screens/starter-back.png){ width="280" }
+<figure class="pair" markdown>
+![The starter project's front page](../assets/screens/starter-front.png){ .page width="280" }
+![The starter project's back page](../assets/screens/starter-back.png){ .page width="280" }
 <figcaption>out/daily-01-front.png and out/daily-02-back.png</figcaption>
 </figure>
 
@@ -130,7 +130,7 @@ daily.pdf                    text outlined, no fonts embedded
 fonts ok
 ```
 
-<figure markdown>
+<figure class="pair" markdown>
 ![A printed daily page in a ring binder](../assets/photos/daily-front.jpg){ width="280" }
 ![Its verso](../assets/photos/daily-back.jpg){ width="280" }
 <figcaption>A two-page daily like this one, printed and bound.</figcaption>

@@ -74,9 +74,9 @@ the number of rows, so it needs no `height`.
               - {type: box, label: "SAT / SUN", height: fill, flex: 2}
 ```
 
-<figure markdown>
-![The weekly plan page](../assets/screens/tutorial-weekly-plan.png){ width="300" }
-![The same page with the debug overlay](../assets/screens/tutorial-weekly-debug.png){ width="300" }
+<figure class="pair" markdown>
+![The weekly plan page](../assets/screens/tutorial-weekly-plan.png){ .page width="300" }
+![The same page with the debug overlay](../assets/screens/tutorial-weekly-debug.png){ .page width="300" }
 <figcaption>The page, and the same page built with <code>--debug</code>.</figcaption>
 </figure>
 
@@ -117,7 +117,7 @@ pages: [plan, notes]
 ```
 
 <figure markdown>
-![The weekly notes page](../assets/screens/tutorial-weekly-notes.png){ width="300" }
+![The weekly notes page](../assets/screens/tutorial-weekly-notes.png){ .page width="300" }
 <figcaption>The verso: binding margin and rule on the right.</figcaption>
 </figure>
 

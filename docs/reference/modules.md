@@ -5,7 +5,7 @@ prints the same list from the installed version, including any types your
 project adds.
 
 <figure markdown>
-![Every built-in module on one page](../assets/screens/modules-gallery.png){ width="360" }
+![Every built-in module on one page](../assets/screens/modules-gallery.png){ .page width="360" }
 <figcaption>The built-ins, top to bottom: <code>fields</code>, <code>heading</code>, <code>rating</code>, <code>box</code>, <code>dotfield</code>, <code>checklist</code>, <code>lines</code>, <code>habit_grid</code>, <code>rule</code>, <code>text</code>, and a <code>row</code> of two boxes.</figcaption>
 </figure>
 

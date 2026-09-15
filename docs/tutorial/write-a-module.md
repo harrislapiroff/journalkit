@@ -120,7 +120,7 @@ echo '- {type: heading, text: TODAY}
 ```
 
 <figure markdown>
-![The timeline module in a preview](../assets/screens/tutorial-timeline.png){ width="300" }
+![The timeline module in a preview](../assets/screens/tutorial-timeline.png){ .page width="300" }
 <figcaption>out/preview/preview-01-preview.png</figcaption>
 </figure>
 

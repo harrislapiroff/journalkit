@@ -17,6 +17,8 @@ repo_url = "https://github.com/harrislapiroff/journalkit"
 repo_name = "harrislapiroff/journalkit"
 edit_uri = "edit/main/docs/"
 
+extra_css = ["stylesheets/extra.css"]
+
 nav = [
   { "Home" = "index.md" },
   { "Tutorial" = [

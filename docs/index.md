@@ -10,13 +10,13 @@ journalkit init my-journal && cd my-journal
 journalkit build --pdf
 ```
 
-<figure markdown>
-![A daily page and a weekly page rendered by journalkit](assets/screens/example-daily-front.png){ width="300" }
-![](assets/screens/example-weekly-plan.png){ width="300" }
+<figure class="pair" markdown>
+![A daily page and a weekly page rendered by journalkit](assets/screens/example-daily-front.png){ .page width="300" }
+![](assets/screens/example-weekly-plan.png){ .page width="300" }
 <figcaption>Two pages from the example project, rendered to PNG.</figcaption>
 </figure>
 
-<figure markdown>
+<figure class="pair" markdown>
 ![The daily page, printed and bound in a ring binder](assets/photos/daily-front.jpg){ width="300" }
 ![The weekly page, printed](assets/photos/weekly-plan.jpg){ width="300" }
 <figcaption>The same pages printed, trimmed and punched for a ring binder.</figcaption>
