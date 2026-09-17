@@ -11,7 +11,7 @@ from .project import Project, import_module_file
 from .theme import Theme
 from .units import mm
 
-#: Icons shipped with journalkit, searched after the project's own.
+#: Icons shipped with JournalKit, searched after the project's own.
 BUILTIN_ICONS = Path(__file__).resolve().parent / "icons"
 
 #: Named page sizes, width x height in mm.
@@ -162,7 +162,7 @@ def load(path: str | Path, project: Project | None = None) -> Document:
         data = yaml.safe_load(path.read_text()) or {}
     except yaml.YAMLError as exc:
         # A syntax error in a hand-written template is a user error, not a
-        # journalkit bug — report it like one instead of a traceback. This is the
+        # JournalKit bug — report it like one instead of a traceback. This is the
         # common case under `journalkit watch`, which rebuilds mid-edit.
         raise ValueError("%s: %s" % (path.name, exc)) from None
     base = path.parent
@@ -186,7 +186,7 @@ def load(path: str | Path, project: Project | None = None) -> Document:
     default_gap = mm(defaults.get("gap", grid))
 
     # Search order: directories the document names (relative to itself),
-    # then the project's icons/, then the set shipped with journalkit.
+    # then the project's icons/, then the set shipped with JournalKit.
     icon_dirs = [base / d for d in data.get("icons", []) or []]
     icon_dirs += [project.icons_dir, BUILTIN_ICONS]
 

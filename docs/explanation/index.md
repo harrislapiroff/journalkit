@@ -1,6 +1,6 @@
 # Explanation
 
-Why things work the way they do. None of this is needed to use journalkit.
+Why things work the way they do. None of this is needed to use JournalKit.
 
 - [The two grids](two-grids.md) — a module grid and a dot lattice, both
   anchored to the page, and what "commensurate" means.

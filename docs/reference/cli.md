@@ -50,7 +50,7 @@ journalkit watch [SOURCE ...] [--project DIR] [-o DIR] [--pdf] [--png] [--dpi N]
 
 Same rendering options as `build`, plus `--interval` (poll period, default
 0.4 s). PDF is opt-in here as everywhere. Watches each project's
-`templates/`, `modules/` and `icons/`, and the installed journalkit package.
+`templates/`, `modules/` and `icons/`, and the installed `journalkit` package.
 A changed template rebuilds only that template; any other change rebuilds
 all of them. Files that appear while watching are picked up.
 
@@ -115,7 +115,7 @@ journalkit doctor [DIR]
 
 Reports Inkscape and Ghostscript on `PATH`; for each font family the
 project's templates name, whether a font file was found (bundled with
-journalkit, or in the system font directories) and whether it has TrueType
+JournalKit, or in the system font directories) and whether it has TrueType
 outlines; and whether `DIR` is a project. Exit 1 if anything is missing.
 
 ## `init`

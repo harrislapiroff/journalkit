@@ -2,7 +2,7 @@
 
 A dotted box with a label in its corner has a problem: some dots fall in the
 label's ink. On screen the text covers them; on a printed page a dot behind
-a letter reads as a smudge. journalkit leaves those dots out.
+a letter reads as a smudge. JournalKit leaves those dots out.
 
 ## Drop, never shift
 

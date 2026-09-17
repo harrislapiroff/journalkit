@@ -397,7 +397,7 @@ def test_back_page_is_mirrored():
 
 
 def test_habit_grid_is_built_in():
-    """The tracker needs no `modules:` key — it ships with journalkit."""
+    """The tracker needs no `modules:` key — it ships with JournalKit."""
     from journalkit.modules import REGISTRY
 
     assert "habit_grid" in REGISTRY

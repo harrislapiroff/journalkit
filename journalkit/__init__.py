@@ -1,4 +1,4 @@
-"""journalkit — YAML page templates for a printable journal.
+"""JournalKit — YAML page templates for a printable journal.
 
     from journalkit import spec, render
     doc = spec.load("templates/daily.yaml")

@@ -1,4 +1,4 @@
-# journalkit
+# JournalKit
 
 YAML page definitions → print-ready SVG/PDF for a hand-bound journal, as a
 pipx-installable tool that runs on a *project directory* (`templates/`,

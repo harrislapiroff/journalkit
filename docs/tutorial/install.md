@@ -1,6 +1,6 @@
 # Install
 
-## journalkit
+## JournalKit
 
 [pipx](https://pipx.pypa.io/) installs a Python command line tool in its own
 environment and puts it on your `PATH`:
@@ -57,7 +57,7 @@ tools (only needed for --pdf and --png):
   ok   inkscape  /opt/homebrew/bin/inkscape
   ok   gs        /opt/homebrew/bin/gs
 fonts:
-  ok   Montserrat (bundled with journalkit)
+  ok   Montserrat (bundled with JournalKit)
 project:
   FAIL /Users/you has no templates/ — run `journalkit init` to start one
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Repo-only tasks for working *on* journalkit — not installed with the tool.
+"""Repo-only tasks for working *on* JournalKit — not installed with the tool.
 
     .venv/bin/python tools/dev.py smoke
 
-The things a user of journalkit needs (build, watch, preview, check, doctor)
+The things a user of JournalKit needs (build, watch, preview, check, doctor)
 live in the ``journalkit`` command. This script holds what only the checkout
 needs: the test suite, the end-to-end smoke run, and a few measurement tools
 for checking rendered geometry while changing the renderer.

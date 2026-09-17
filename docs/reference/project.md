@@ -55,7 +55,7 @@ Lookup order for `icon: <name>`:
 
 1. directories listed under `icons:` in the document, relative to it;
 2. the project's `icons/`;
-3. the icons shipped with journalkit.
+3. the icons shipped with JournalKit.
 
 The first `<name>.svg` found wins.
 

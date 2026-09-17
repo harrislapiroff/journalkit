@@ -47,7 +47,7 @@ white.
 ## Fonts
 
 Text is drawn as glyph outlines read from the font file. Montserrat
-Regular, Medium and Bold ship with journalkit (SIL Open Font License); the
+Regular, Medium and Bold ship with JournalKit (SIL Open Font License); the
 default theme uses weights 500 and 700.
 
 To use another font, name it and have it installed on the machine that
@@ -59,12 +59,12 @@ theme:
     family: Source Sans 3
 ```
 
-journalkit finds the file in the usual font directories and outlines from
+JournalKit finds the file in the usual font directories and outlines from
 it the same way. `journalkit doctor` reports whether each family a project
 uses was found. Two caveats:
 
 - Only TrueType outlines (`glyf`) are read. For a CFF-flavoured OpenType
-  font, journalkit still reads the metrics but emits SVG `<text>`, and
+  font, JournalKit still reads the metrics but emits SVG `<text>`, and
   Inkscape then needs the font installed to make the PDF.
 - Kerning is not applied. On short capital labels this is hard to see; on a
   long line of mixed-case text you may notice it.

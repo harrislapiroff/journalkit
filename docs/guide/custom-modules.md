@@ -118,9 +118,9 @@ can walk into it.
   …); that raises. Two project files defining the same name is allowed and
   the later replaces the earlier, because two projects are routinely built in
   one process.
-- Imports of `journalkit.…` work because the module runs inside journalkit's
+- Imports of `journalkit.…` work because the module runs inside JournalKit's
   process. Third-party imports need to be installed in the same environment
-  as journalkit (`pipx inject journalkit <package>`).
+  as the `journalkit` package (`pipx inject journalkit <package>`).
 
 ## Documenting
 
