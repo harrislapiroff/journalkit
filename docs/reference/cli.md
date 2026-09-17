@@ -115,7 +115,7 @@ journalkit doctor [DIR]
 
 Reports Inkscape and Ghostscript on `PATH`; for each font family the
 project's templates name, whether a font file was found (bundled with
-journalkit, or in the system font directories) and whether it has TrueType
+JournalKit, or in the system font directories) and whether it has TrueType
 outlines; and whether `DIR` is a project. Exit 1 if anything is missing.
 
 ## `init`

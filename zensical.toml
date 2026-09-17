@@ -7,7 +7,7 @@
 # explanation.
 
 [project]
-site_name = "journalkit"
+site_name = "JournalKit"
 site_description = "YAML page templates for a printable, hand-bound journal, rendered to print-ready SVG and PDF."
 site_url = "https://harrislapiroff.github.io/journalkit/"
 site_author = "Harris Bard Lapiroff"

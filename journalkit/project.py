@@ -1,6 +1,6 @@
 """The project directory: where a journal's templates, modules and icons live.
 
-journalkit is run *on a directory*. A project is nothing more than a folder
+JournalKit is run *on a directory*. A project is nothing more than a folder
 with this shape — every part of it optional except ``templates/``::
 
     my-journal/

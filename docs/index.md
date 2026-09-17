@@ -1,6 +1,6 @@
-# journalkit
+# JournalKit
 
-journalkit turns a YAML description of a journal page into print-ready SVG
+JournalKit turns a YAML description of a journal page into print-ready SVG
 and PDF. You list the modules a page should have — a date field, a heading,
 a dotted box, a checklist — and it lays them out on a grid.
 
@@ -11,7 +11,7 @@ journalkit build --pdf
 ```
 
 <figure class="pair" markdown>
-![A daily page and a weekly page rendered by journalkit](assets/screens/example-daily-front.png){ .page width="300" }
+![A daily page and a weekly page rendered by JournalKit](assets/screens/example-daily-front.png){ .page width="300" }
 ![](assets/screens/example-weekly-plan.png){ .page width="300" }
 <figcaption>Two pages from the example project, rendered to PNG.</figcaption>
 </figure>

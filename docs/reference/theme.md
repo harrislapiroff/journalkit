@@ -67,7 +67,7 @@ document; set an individual role to pin just that role. You may add your own
 keys (`accent: "#c00"`) and point roles at them.
 
 **`font.family`** — Montserrat is bundled; any other family must be
-installed on the machine that builds. journalkit reads the font file for
+installed on the machine that builds. JournalKit reads the font file for
 metrics and glyph outlines. `journalkit doctor` reports what it found.
 
 **`font.outline`** — `true` draws every glyph as an SVG path, so the output

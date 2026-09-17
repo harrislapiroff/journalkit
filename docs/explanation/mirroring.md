@@ -2,7 +2,7 @@
 
 A bound book has a spine. The margin next to it has to be wider — for the
 stitching, and because the page curves into the gutter — and it swaps sides
-between a right-hand page and a left-hand page. journalkit resolves this
+between a right-hand page and a left-hand page. JournalKit resolves this
 once, at one place, and never again.
 
 ## Margins are named by their job

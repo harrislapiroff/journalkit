@@ -1,6 +1,6 @@
 """Font files, read directly: advance widths, cap height and glyph outlines.
 
-journalkit draws text as **outlines** — every glyph becomes an SVG ``<path>``
+JournalKit draws text as **outlines** — every glyph becomes an SVG ``<path>``
 — so the finished page depends on no installed font, and Inkscape has nothing
 to substitute.  That needs the glyph data, so this is a small sfnt reader over
 the tables that matter: ``head``, ``hhea``, ``hmtx``, ``cmap`` and ``OS/2``
@@ -40,7 +40,7 @@ WEIGHT_NAMES = {
     500: "Medium", 600: "SemiBold", 700: "Bold", 800: "ExtraBold", 900: "Black",
 }
 
-#: Fonts shipped with journalkit, searched before the system.
+#: Fonts shipped with JournalKit, searched before the system.
 BUNDLED_FONTS = Path(__file__).resolve().parent / "fonts"
 
 FONT_DIRS = [

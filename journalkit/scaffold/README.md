@@ -1,4 +1,4 @@
-# A journalkit project
+# A JournalKit project
 
 This directory is a journal. Build it with:
 
@@ -18,4 +18,4 @@ out/         what `journalkit build` writes; safe to delete
 
 `journalkit modules` lists every module type available here, including the
 ones from `modules/`. The full reference for templates, themes and modules is
-in the journalkit README.
+in the JournalKit README.

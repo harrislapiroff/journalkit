@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Normalise raw SVG exports into journalkit icons.
+"""Normalise raw SVG exports into JournalKit icons.
 
 Icons in ``icons/`` are plain SVGs whose viewBox is a *tight* bounding box of
 their artwork and whose paths use ``fill="currentColor"``.  Anything that meets

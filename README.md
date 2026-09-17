@@ -1,8 +1,8 @@
-# journalkit
+# JournalKit
 
 Page templates for a printable, hand-bound journal. You describe each page as
 a list of modules in YAML — a dated header, a rating scale, a dotted notes box,
-a checklist — and journalkit lays them out on a modular grid and renders
+a checklist — and JournalKit lays them out on a modular grid and renders
 print-ready SVG and PDF.
 
 ```sh
@@ -45,7 +45,7 @@ it was found.
 
 ## A project
 
-journalkit runs on a directory. `journalkit init` creates one:
+JournalKit runs on a directory. `journalkit init` creates one:
 
 ```
 my-journal/
@@ -292,7 +292,7 @@ project's `modules/` adds.
 ## Icons
 
 Icons are plain SVG files referenced by filename stem (`icon: sunrise`). The
-built-in set — `sunrise`, `moon`, `mood-1` … `mood-5` — ships with journalkit;
+built-in set — `sunrise`, `moon`, `mood-1` … `mood-5` — ships with JournalKit;
 drop your own into your project's `icons/` and they take precedence.
 Requirements: the `viewBox` must be a *tight* bounding box of the artwork, and
 paths that should take the theme colour use

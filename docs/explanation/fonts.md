@@ -2,12 +2,12 @@
 
 ## Text is drawn as outlines
 
-journalkit reads glyph outlines from the font file and writes each label as
+JournalKit reads glyph outlines from the font file and writes each label as
 an SVG `<path>`. The SVG and the PDF contain no fonts and no text, only
 shapes, so the output is the same on every machine.
 
 The alternative, emitting SVG `<text>` and letting Inkscape set it, depends
-on Inkscape finding the same font journalkit measured. If it does not, it
+on Inkscape finding the same font JournalKit measured. If it does not, it
 substitutes another without saying so, and every baseline is slightly off.
 Outlining removes the possibility.
 
@@ -15,7 +15,7 @@ Outlining removes the possibility.
 
 SVG positions text by its baseline. To centre a capital label in a row you
 need the height of a capital, which is a fraction of the font size and
-differs between fonts (Montserrat publishes 0.700). journalkit reads it from
+differs between fonts (Montserrat publishes 0.700). JournalKit reads it from
 the font's `OS/2` table and places baselines with it, so labels sit where
 the theme's `label.dy` says regardless of size.
 

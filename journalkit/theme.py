@@ -20,7 +20,7 @@ DEFAULT_THEME = {
     "stroke_width": "0.25pt",
     "fill": "none",
     "font": {
-        # Montserrat Regular/Medium/Bold ship with journalkit; any other
+        # Montserrat Regular/Medium/Bold ship with JournalKit; any other
         # family must be installed on the machine doing the build.
         "family": "Montserrat",
         # Draw text as glyph outlines read from the font file, so the output

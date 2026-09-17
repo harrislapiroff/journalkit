@@ -1,9 +1,9 @@
 ---
 name: run-journalkit
-description: Build, run, and drive journalkit — the journal page-template renderer that turns YAML into printable SVG/PDF. Use when asked to run journalkit or the notebook generator, render or preview a template, screenshot a page, add or test a module type, check the module grid, or verify PDF output.
+description: Build, run, and drive JournalKit — the journal page-template renderer that turns YAML into printable SVG/PDF. Use when asked to run JournalKit or the notebook generator, render or preview a template, screenshot a page, add or test a module type, check the module grid, or verify PDF output.
 ---
 
-journalkit renders YAML page definitions into print-ready SVG and PDF. It has
+JournalKit renders YAML page definitions into print-ready SVG and PDF. It has
 no GUI and no server — the "running app" is a set of print artifacts — so
 driving it means rendering, *looking* at the result, and asserting the
 invariants that make it correct.

@@ -205,8 +205,8 @@ def _font_status(family: str) -> tuple[bool, str]:
     metrics = load(family)
     if metrics is None:
         return False, ("%s NOT found — install it, or set theme.font.family to "
-                       "Montserrat, which ships with journalkit" % family)
-    where = "bundled with journalkit" if BUNDLED_FONTS in metrics.path.parents else str(metrics.path)
+                       "Montserrat, which ships with JournalKit" % family)
+    where = "bundled with JournalKit" if BUNDLED_FONTS in metrics.path.parents else str(metrics.path)
     if metrics.has_outlines:
         return True, "%s (%s)" % (family, where)
     return True, ("%s (%s) — no TrueType outlines, so text is set by Inkscape: "

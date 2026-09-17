@@ -1,11 +1,11 @@
 # Icons
 
 Icons are SVG files referenced by their file stem: `icon: sunrise` means
-`sunrise.svg`. journalkit looks in, in order:
+`sunrise.svg`. JournalKit looks in, in order:
 
 1. any directories a document lists under `icons:` (relative to the document);
 2. the project's `icons/` directory;
-3. the set shipped with journalkit.
+3. the set shipped with JournalKit.
 
 Your own file wins over a built-in of the same name.
 
