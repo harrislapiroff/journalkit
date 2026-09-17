@@ -40,7 +40,7 @@ dependencies.
 
 ## Using another font
 
-Set `theme.font.family`. journalkit looks in the user and system font
+Set `theme.font.family`. JournalKit looks in the user and system font
 directories and, where available, asks `fc-match`; a TrueType font found
 there is outlined like the bundled one. `journalkit doctor` reports what was
 found for each family a project uses, and `journalkit check` confirms the

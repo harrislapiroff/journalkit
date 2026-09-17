@@ -50,7 +50,7 @@ journalkit watch [SOURCE ...] [--project DIR] [-o DIR] [--pdf] [--png] [--dpi N]
 
 Same rendering options as `build`, plus `--interval` (poll period, default
 0.4 s). PDF is opt-in here as everywhere. Watches each project's
-`templates/`, `modules/` and `icons/`, and the installed journalkit package.
+`templates/`, `modules/` and `icons/`, and the installed `journalkit` package.
 A changed template rebuilds only that template; any other change rebuilds
 all of them. Files that appear while watching are picked up.
 

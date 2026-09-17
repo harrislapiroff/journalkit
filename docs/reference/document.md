@@ -110,7 +110,7 @@ Each entry is a mapping with `type` and that module's parameters (see the
 | `flex` | weight among sibling `fill` modules; default 1 |
 | `valign` | inside a `row`: `top` (default), `middle`, `bottom` |
 | `theme` | per-module theme overrides |
-| `id` | a name for your own reference; unused by journalkit |
+| `id` | a name for your own reference; unused by JournalKit |
 | `stroke`, `stroke_width` | per-module overrides where the module draws a frame |
 
 A bare string is shorthand for `{type: <string>}`, so `- spacer` works.
