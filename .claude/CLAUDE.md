@@ -36,6 +36,18 @@ templates are the test fixtures — keep them building.
 To drive, screenshot, or verify the renderer, use the `run-journalkit` skill
 (`.claude/skills/run-journalkit/SKILL.md`).
 
+## Releasing
+
+`.github/workflows/publish.yml` publishes to PyPI on a `v*` tag, via trusted
+publishing (no token in the repo). The version lives only in
+`pyproject.toml` (`journalkit.__version__` reads it back from the installed
+metadata), and the workflow refuses a tag that doesn't match it.
+
+```sh
+# bump `version` in pyproject.toml, commit, then:
+git tag v0.3.0 && git push origin v0.3.0
+```
+
 ## Invariants worth not breaking
 
 - **Module placements snap to the module grid** — 2 mm in the example, and

@@ -6,7 +6,7 @@ a checklist — and JournalKit lays them out on a modular grid and renders
 print-ready SVG and PDF.
 
 ```sh
-pipx install https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
+pipx install journalkit
 journalkit init my-journal && cd my-journal
 journalkit build --pdf
 ```
@@ -21,15 +21,15 @@ design. This README is the short version.
 
 ## Install
 
-With [pipx](https://pipx.pypa.io/), straight from GitHub — no git needed,
-pip downloads the archive:
+With [pipx](https://pipx.pypa.io/), from PyPI:
 
 ```sh
-pipx install https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
+pipx install journalkit
 ```
 
-Upgrade the same way with `pipx install --force …`. To pin a release instead
-of following `main`, use a tag: `…/archive/refs/tags/v0.2.0.tar.gz`.
+Upgrade with `pipx upgrade journalkit`. To run whatever is on `main` instead
+of the last release, install GitHub's archive of the branch:
+`pipx install --force https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz`.
 
 Then the tools for PDF output, if you want it:
 

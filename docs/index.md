@@ -5,7 +5,7 @@ and PDF. You list the modules a page should have — a date field, a heading,
 a dotted box, a checklist — and it lays them out on a grid.
 
 ```sh
-pipx install https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
+pipx install journalkit
 journalkit init my-journal && cd my-journal
 journalkit build --pdf
 ```

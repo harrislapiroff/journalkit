@@ -5,7 +5,9 @@
     pages = render.Renderer(doc).render_all()
 """
 
-__version__ = "0.2.0"
+from importlib.metadata import version as _version
+
+__version__ = _version("journalkit")   # the one in pyproject.toml
 
 from . import modules  # noqa: F401  (populates the module registry)
 

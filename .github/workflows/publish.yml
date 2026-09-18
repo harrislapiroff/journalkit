@@ -1,0 +1,61 @@
+name: publish
+
+# Pushing a tag `vX.Y.Z` builds the sdist and wheel, checks that the tag
+# matches the version in pyproject.toml, runs the
+# tests, and uploads to PyPI via trusted publishing (OIDC) — no API token.
+# The `pypi` environment must exist in the repo settings and the project on
+# PyPI must list this workflow as a trusted publisher.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check the tag matches the package version
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pyproject=$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          echo "tag=$tag pyproject=$pyproject"
+          test "$tag" = "$pyproject" || { echo "tag v$tag does not match pyproject.toml version $pyproject"; exit 1; }
+
+      - name: Run the tests
+        run: |
+          pip install -e .
+          python tests/test_journalkit.py
+
+      - name: Build sdist and wheel
+        run: |
+          pip install build twine
+          python -m build
+          twine check dist/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/journalkit/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

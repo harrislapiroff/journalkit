@@ -6,20 +6,22 @@
 environment and puts it on your `PATH`:
 
 ```sh
-pipx install https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
+pipx install journalkit
 ```
 
-That is GitHub's archive of the `main` branch; pip installs it directly, no
-git needed. For a specific release use a tag:
-`.../archive/refs/tags/v0.2.0.tar.gz`. Upgrade with the same command plus
-`--force`.
+Upgrade with `pipx upgrade journalkit`. To run whatever is on `main` instead
+of the last release, install GitHub's archive of the branch — pip downloads
+it directly, no git needed:
+
+```sh
+pipx install --force https://github.com/harrislapiroff/journalkit/archive/refs/heads/main.tar.gz
+```
 
 ```sh
 journalkit --version
 ```
 
-Plain `pip install <the same URL>` works too, in any Python 3.10+
-environment.
+Plain `pip install journalkit` works too, in any Python 3.10+ environment.
 
 ## Inkscape and Ghostscript
 
