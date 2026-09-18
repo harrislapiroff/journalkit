@@ -68,7 +68,7 @@ DEFAULT_THEME = {
     # The checkbox, shared by every module that draws one (checklist,
     # habit_grid), so a habit is ticked the same way as a task.
     "marker": {
-        "shape": "circle-slash",   # circle-slash | circle | square | none | icon:<name>
+        "shape": "circle",         # circle | circle-slash | square | none | icon:<name>
         "size": 5.0,
         # A knockout, so it masks whatever is under it: not themed on purpose.
         "fill": "#ffffff",

@@ -234,7 +234,7 @@ class Module:
     def draw_marker(self, canvas, box, marker=None):
         """Draw a checkbox marker centred in ``box``, at ``theme.marker.shape``.
 
-        The shape is one of ``circle-slash``, ``circle``, ``square``, ``none``
+        The shape is one of ``circle``, ``circle-slash``, ``square``, ``none``
         or ``icon:<name>``; its diameter is whichever of ``box``'s sides is
         shorter, so the caller sizes it by handing over the right rect.  The
         fill is a knockout rather than the page colour, so a marker sitting on

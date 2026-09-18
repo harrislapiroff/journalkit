@@ -26,7 +26,7 @@ class HabitGrid(Module):
         "label_gap": "clearance between the label gutter and the first column "
                      "(default: the module grid)",
         "cell": "column width; defaults to filling the remaining width",
-        "marker": "circle-slash | circle | square | none | icon:<name>",
+        "marker": "circle | circle-slash | square | none | icon:<name>",
         "marker_size": "marker diameter; defaults to the row height",
     }
 

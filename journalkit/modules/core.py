@@ -249,7 +249,7 @@ class Checklist(_Framed):
         "rows": "number of rows (default 5)",
         "row_height": "height of each row (default 5)",
         "row_gap": "gap between rows (default 2.5)",
-        "marker": "circle-slash | circle | square | none | icon:<name>",
+        "marker": "circle | circle-slash | square | none | icon:<name>",
         "marker_size": "marker box size in mm (default 5)",
         "marker_gap": "gap between marker and writing box",
         "labels": "optional list of labels, one per row",

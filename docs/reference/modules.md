@@ -115,7 +115,7 @@ Rows of a marker plus a writing box. Intrinsic height from the rows.
 | `rows` | `5` | number of rows |
 | `row_height` | `5` | |
 | `row_gap` | `2.5` | space between rows |
-| `marker` | `theme.marker.shape` | `circle-slash`, `circle`, `square`, `none`, `icon:<name>` |
+| `marker` | `theme.marker.shape` | `circle`, `circle-slash`, `square`, `none`, `icon:<name>` |
 | `marker_size` | `theme.marker.size` | marker box size |
 | `marker_gap` | `theme.checklist.marker_gap` | space between marker and box |
 | `labels` | | list of labels, one per row |

@@ -96,7 +96,7 @@ theme:
     radius: 0.125
     reserve_label: band     # band | text | none
   marker:
-    shape: circle-slash     # circle-slash | circle | square | none | icon:<name>
+    shape: circle           # circle | circle-slash | square | none | icon:<name>
     size: 5
 ```
 

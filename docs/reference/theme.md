@@ -42,7 +42,7 @@ dots:
   label_pad: 0.75              # clearance around a label, for reserve_label
 
 marker:                        # the checkbox in checklist and habit_grid
-  shape: circle-slash          # circle-slash | circle | square | none | icon:<name>
+  shape: circle                # circle | circle-slash | square | none | icon:<name>
   size: 5.0
   fill: "#ffffff"              # a knockout: deliberately not $theme.ink
 

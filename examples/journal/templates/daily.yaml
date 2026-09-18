@@ -42,6 +42,8 @@ theme:
     weight: 700
   dots:
     reserve_label: text
+  marker:
+    shape: circle-slash    # a slashed circle to tick off, rather than a plain one
 
 # Drawn on every page; `inner` mirrors automatically between recto and verso.
 decorations:
