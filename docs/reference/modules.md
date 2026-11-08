@@ -6,7 +6,7 @@ project adds.
 
 <figure markdown>
 ![Every built-in module on one page](../assets/screens/modules-gallery.png){ .page width="360" }
-<figcaption>The built-ins, top to bottom: <code>fields</code>, <code>heading</code>, <code>rating</code>, <code>box</code>, <code>dotfield</code>, <code>checklist</code>, <code>lines</code>, <code>habit_grid</code>, <code>rule</code>, <code>text</code>, and a <code>row</code> of two boxes.</figcaption>
+<figcaption>The built-ins, top to bottom: <code>fields</code>, <code>heading</code>, <code>rating</code>, <code>box</code>, <code>dotfield</code>, <code>checklist</code>, <code>lines</code>, <code>habit_grid</code>, <code>rule</code>, <code>text</code>, and a <code>row</code> of two boxes. <code>month_grid</code> wants a landscape page of its own; it is pictured <a href="#month_grid">below</a>.</figcaption>
 </figure>
 
 Lengths are millimetres unless suffixed. Any value may be a `$theme.<path>`
@@ -161,6 +161,11 @@ for the date. There are no rules between days, so a note can run across
 several of them. No intrinsic height; it is meant for a [landscape
 page](document.md#templates-and-pages), where the seven columns get the long
 side.
+
+<figure markdown>
+![A landscape month page: a MONTH/YEAR and THEME field row over a five-week month_grid](../assets/screens/example-monthly.png){ .page width="300" }
+<figcaption>The example journal's <code>monthly.yaml</code>: a <code>fields</code> row and a <code>month_grid</code> on a landscape recto. Turn the page so the binding is at the bottom to read it.</figcaption>
+</figure>
 
 | parameter | default | |
 |---|---|---|

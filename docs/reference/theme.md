@@ -101,7 +101,7 @@ number in millimetres. See [units](units.md).
 | key | used by |
 |---|---|
 | `stroke`, `stroke_width` | every frame and rule |
-| `label.*` | `box`, `fields`, `lines`, `checklist` labels, `habit_grid` labels and headers, `rating` label, `text` |
+| `label.*` | `box`, `fields`, `lines`, `checklist` labels, `habit_grid` labels and headers, `month_grid` day names, `rating` label, `text` |
 | `heading.*` | `heading`, `text` with `style: heading` |
 | `dots.*` | any module with `dots: true`; `dots.colour`/`radius`/`opacity` also default `grid.dots` |
 | `marker.*` | `checklist`, `habit_grid` |
