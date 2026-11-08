@@ -67,6 +67,12 @@ margin, and decorations anchored to it stay beside the binding. Modules
 are not told the orientation either; they get an upright rectangle in the
 turned coordinates and draw in it as usual.
 
+Each landscape page is read on its own. A recto and a verso turn opposite
+ways (each puts its own binding at the bottom), so two facing landscape
+pages are not one spread: turning the book to read one leaves the other
+upside down. That suits single leaves in a binder; a landscape spread across
+both pages is not supported.
+
 ## Consequences
 
 - One template per page design.

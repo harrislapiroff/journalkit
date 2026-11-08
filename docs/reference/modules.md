@@ -170,10 +170,10 @@ side.
 | parameter | default | |
 |---|---|---|
 | `weeks` | `5` | number of week rows |
-| `headers` | `[MON, TUE, WED, THU, FRI, SAT, SUN]` | day names, left to right; their count sets the columns |
+| `headers` | `[MON, TUE, WED, THU, FRI, SAT, SUN]` | day names, left to right; their count sets the columns. A name wider than its column warns |
 | `header_height` | two module grids | the day-name row above the frame; `0` drops the day names |
 | `number` | `corner` | date slot: `corner` (an L closing the corner), `box`, `tick` (just the divider), `none` |
-| `number_size` | `[6, 4]` | slot width and height, as lengths |
+| `number_size` | `[6, 4]` | slot width and height, as lengths; never more than one day's cell |
 | `dots` | | dot grid in each week, kept off the rules and the date slots |
 
 ```yaml

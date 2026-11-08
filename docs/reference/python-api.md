@@ -55,7 +55,8 @@ private.
 `RenderContext`
 :   What a module sees beyond its spec: `theme`, `icons`, `grid`,
     `default_gap`, `dots`, `page`, `content`, `side`, `debug`, `warnings`,
-    `frame` (the page's `Frame`; `None` means portrait).
+    `frame` (the page's `Frame`, always set by `Renderer`; `turn` 0 is
+    portrait, and `None` on a hand-built context is treated the same).
     Methods `warn(message)`, `dot_points(rect, spacing=None, origin=None,
     inset=0.0, exclude=())`, `draw_dots(canvas, rect, options=None,
     exclude=())`.

@@ -63,13 +63,23 @@ def check_grid(sources: list[Path], out=print) -> int:
         renderer = Renderer(document)
         for page_spec in document.pages:
             _, content = renderer.content_rect(page_spec)
+            _, sheet = renderer.sheet_rect(page_spec)
             canvas, ctx = renderer.render_page(page_spec)
             children = [build_module(s, ctx) for s in page_spec.content]
             placements = layout_stack(children, content, ctx.default_gap, ctx.grid, ctx)
 
+            # Placements are checked in the coordinates they were laid out in
+            # (turned, on a landscape page) relative to their content rect.
             offsets = {"x": _phase(content.x, grid), "y": _phase(content.y, grid),
                        "w": _phase(content.w, grid), "h": _phase(content.h, grid)}
-            askew = {k: v for k, v in offsets.items() if abs(v) > 1e-6}
+            # Whether the content rect itself is on the lattice is a property
+            # of the sheet, where the grid is anchored, so it is measured
+            # there. Turned coordinates count from the far edge of the sheet.
+            askew = {k: v for k, v in (("x", _phase(sheet.x, grid)),
+                                       ("y", _phase(sheet.y, grid)),
+                                       ("w", _phase(sheet.w, grid)),
+                                       ("h", _phase(sheet.h, grid)))
+                     if abs(v) > 1e-6}
 
             offenders = []
             for placement in placements:

@@ -100,7 +100,8 @@ Page names become part of output file names: `<document>-<nn>-<name>.svg`.
 
 `orientation: landscape` lays a page's content out turned a quarter turn,
 for a page read with the book on its side and the binding at the bottom:
-clockwise on a recto, anticlockwise on a verso. The content rectangle the
+clockwise on a recto, anticlockwise on a verso, so each landscape page is
+read on its own rather than as a spread with the page facing it. The content rectangle the
 modules see is the text block turned with it. Margins (`inner` stays the
 binding side), decorations and the dot lattice are not turned; they belong
 to the physical sheet. (A module's own `dots: {origin: …}` override is the

@@ -104,7 +104,8 @@ class RenderContext:
     debug: bool = False
     warnings: list = field(default_factory=list)
     #: How ``page``/``content`` (and everything modules draw) map onto the
-    #: sheet. ``None`` is portrait: local and sheet coordinates coincide.
+    #: sheet. The renderer always sets one; ``frame.turn == 0`` is portrait.
+    #: ``None`` (a context built by hand, as in tests) is treated as portrait.
     frame: Frame | None = None
 
     def warn(self, message: str) -> None:
@@ -277,7 +278,7 @@ class Renderer:
         frame = self.frame(page_spec)
         return frame.rect_to_local(page), frame.rect_to_local(content)
 
-    def _context(self, page_spec, theme, page, content, frame=None) -> RenderContext:
+    def _context(self, page_spec, theme, page, content, frame, warnings=None) -> RenderContext:
         return RenderContext(
             theme=theme,
             icons=self.icons,
@@ -289,6 +290,7 @@ class Renderer:
             side=page_spec.side,
             debug=self.debug,
             frame=frame,
+            warnings=[] if warnings is None else warnings,
         )
 
     def render_page(self, page_spec) -> tuple[Canvas, RenderContext]:
@@ -300,11 +302,11 @@ class Renderer:
         ctx = self._context(page_spec, theme, page, content, frame)
         # Decorations are furniture of the physical sheet (a rule beside the
         # binding stays beside the binding), so they never turn with the page.
-        sheet = ctx if not frame.turn else self._context(page_spec, theme, sheet_page,
-                                                         sheet_content)
         # Callers read warnings off the context this returns, so a warning
         # raised while drawing decorations has to land in the same list.
-        sheet.warnings = ctx.warnings
+        sheet = ctx if not frame.turn else self._context(
+            page_spec, theme, sheet_page, sheet_content,
+            Frame(self.doc.width, self.doc.height), warnings=ctx.warnings)
 
         canvas = Canvas(self.doc.width, self.doc.height, self.background)
         # The module grid is anchored to the sheet, so the overlay is too.

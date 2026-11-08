@@ -537,10 +537,18 @@ def test_frame_round_trips_and_puts_the_binding_at_the_bottom():
     assert Frame.for_page(105, 170, "right", "portrait").transform is None
 
 
-def _landscape_document(side="right"):
+def _load_source(source):
+    """Load a document from YAML text, leaving no file behind."""
     import tempfile
 
-    source = """
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "doc.yaml"
+        path.write_text(source)
+        return spec.load(path)
+
+
+def _landscape_document(side="right"):
+    return _load_source("""
 document: land
 page: {size: [105, 170], margins: {top: 2, bottom: 8, inner: 16, outer: 5}}
 grid: {module: 2, dots: {spacing: 4, origin: [0, 2]}}
@@ -550,10 +558,7 @@ templates:
     side: %s
     orientation: landscape
     content: [{type: box, height: fill, dots: true}]
-""" % side
-    with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as handle:
-        handle.write(source)
-    return spec.load(handle.name)
+""" % side)
 
 
 def test_landscape_turns_the_content_but_not_the_sheet():
@@ -594,17 +599,35 @@ def test_landscape_dots_stay_on_the_sheet_lattice():
 
 
 def test_unknown_orientation_is_an_error():
-    import tempfile
-
-    source = "templates: {p: {orientation: sideways, content: []}}"
-    with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as handle:
-        handle.write(source)
     try:
-        spec.load(handle.name)
+        _load_source("templates: {p: {orientation: sideways, content: []}}")
     except ValueError as exc:
         assert "sideways" in str(exc)
     else:
         raise AssertionError("an unknown orientation should not load")
+
+
+def test_grid_check_measures_landscape_against_the_sheet():
+    from journalkit.checks import check_grid
+    import tempfile
+
+    # The recto's margins (16 and 5 on a 105mm sheet) put its text block on
+    # the 2mm lattice at x=16; turned coordinates count from the far edge,
+    # where it is 5mm in. Only the verso, whose left margin is 5, is askew.
+    with tempfile.TemporaryDirectory() as tmp:
+        notes = {}
+        for side in ("right", "left"):
+            path = Path(tmp) / ("%s.yaml" % side)
+            path.write_text("""
+page: {size: [105, 170], margins: {top: 2, bottom: 8, inner: 16, outer: 5}}
+grid: {module: 2}
+templates: {cal: {side: %s, orientation: landscape, content: [{type: box, height: fill}]}}
+""" % side)
+            lines = []
+            assert check_grid([path], out=lines.append) == 0
+            notes[side] = [line for line in lines if "off the lattice" in line]
+        assert not notes["right"], notes["right"]
+        assert notes["left"] and "x+1.00" in notes["left"][0]
 
 
 def test_month_grid_is_built_in():
@@ -676,6 +699,37 @@ def test_landscape_debug_overlay_is_drawn_on_the_sheet():
                       for x in xs), "debug grid lines sit on the sheet's module grid"
     # Drawn on the sheet, before (outside) the turned content group.
     assert svg.index("debug overlay") < svg.index('transform="matrix(')
+
+
+def test_month_grid_slots_stay_in_their_cell_and_tick_clears_little():
+    from journalkit.svg import Canvas
+
+    ctx = _context()
+    # Fourteen columns 5mm wide: the default 6mm slot must shrink to fit.
+    canvas = Canvas(200, 200)
+    build({"type": "month_grid", "headers": ["X"] * 14, "number": "box"},
+          ctx).draw(canvas, Rect(0, 0, 70, 60))
+    for x1, _, x2, _ in re.findall(r'<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"',
+                                   canvas.to_svg()):
+        if not close(float(x2) - float(x1), 70):        # not a week rule
+            assert float(x2) - float(x1) <= 5 + 1e-6
+
+    # A tick leaves far more dots than a full slot does.
+    def dot_count(style):
+        canvas = Canvas(200, 200)
+        build({"type": "month_grid", "number": style, "dots": True},
+              ctx).draw(canvas, Rect(25, 25, 140, 80))
+        return canvas.to_svg().count("<circle")
+    assert dot_count("tick") > dot_count("corner")
+
+
+def test_month_grid_warns_when_a_day_name_overflows():
+    from journalkit.svg import Canvas
+
+    ctx = _context()
+    build({"type": "month_grid", "headers": ["WEDNESDAY"] * 7},
+          ctx).draw(Canvas(200, 200), Rect(0, 0, 70, 60))
+    assert any("WEDNESDAY" in w for w in ctx.warnings)
 
 
 # --------------------------------------------------------------------------

@@ -62,13 +62,20 @@ class MonthGrid(Module):
         # A zero-height header row means no day names at all.
         if header_h > 0:
             label_dx = self.theme.mm("label.dx")
+            label_size = self.theme.mm("label.size")
             baseline = rect.y + header_h - min(1.0, header_h / 4)
             for index, name in enumerate(headers):
+                if label_dx + self.text_width(str(name), label_size) > col_w:
+                    self.ctx.warn("month_grid: day name %r is wider than its %.1fmm column"
+                                  % (name, col_w))
                 self.text(canvas, rect.x + index * col_w + label_dx, baseline,
                           name, style="label")
 
         frame = Rect(rect.x, rect.y + header_h, rect.w, rect.h - header_h)
         row_h = frame.h / weeks
+        # A slot never reaches past its own day: narrow columns or short
+        # weeks shrink it rather than letting it cross into the next cell.
+        num_w, num_h = min(num_w, col_w), min(num_h, row_h)
         canvas.rect(frame.x, frame.y, frame.w, frame.h, fill="none", **stroke)
 
         slots = []
@@ -99,6 +106,12 @@ class MonthGrid(Module):
             for week in range(weeks):
                 band = Rect(frame.x, frame.y + week * row_h, frame.w, row_h).inset(clear)
                 week_slots = slots[week * columns:(week + 1) * columns]
-                exclude = [s.inset(-clear) for s in week_slots] if style != "none" else []
+                if style == "none":
+                    exclude = []
+                elif style == "tick":   # only the divider is drawn; clear just it
+                    exclude = [Rect(s.right - clear, s.y, 2 * clear, s.h + clear)
+                               for s in week_slots]
+                else:
+                    exclude = [s.inset(-clear) for s in week_slots]
                 self.ctx.draw_dots(canvas, band, options=self.spec.get("dots"),
                                    exclude=exclude)

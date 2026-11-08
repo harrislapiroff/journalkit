@@ -212,15 +212,16 @@ def load(path: str | Path, project: Project | None = None) -> Document:
         merged = dict(template)
         merged.update({k: v for k, v in entry.items() if k not in ("repeat", "template")})
 
+        orientation = merged.get("orientation", "portrait")
+        if orientation not in ORIENTATIONS:
+            raise ValueError("%s: unknown orientation %r (known: %s)"
+                             % (template_name or "page", orientation, ", ".join(ORIENTATIONS)))
+
         count = int(entry.get("repeat", 1))
         for index in range(count):
             name = merged.get("name") or template_name or "page"
             if count > 1:
                 name = "%s-%02d" % (name, index + 1)
-            orientation = merged.get("orientation", "portrait")
-            if orientation not in ORIENTATIONS:
-                raise ValueError("page %r: unknown orientation %r (known: %s)"
-                                 % (name, orientation, ", ".join(ORIENTATIONS)))
             pages.append(
                 PageSpec(
                     name=name,

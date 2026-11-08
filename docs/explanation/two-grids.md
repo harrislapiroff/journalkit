@@ -63,9 +63,8 @@ The last condition is the one that bites, because page sizes are given.
 105 mm is 42 × 2.5 and divides a 2.5 mm grid exactly; it is 52.5 × 2, so on a
 2 mm grid one of the two horizontal margins must be odd and the verso's
 content rectangle is 1 mm off the lattice. A5's 148 mm divides 2 but not 2.5.
-A landscape page inherits the same arithmetic turned on its side: on
-either side its content's top edge is the `outer` margin, so with an odd
-`outer` every landscape page is reported off the lattice, in `y`.
+A landscape page is checked against the sheet like any other, so it gets
+the same note as a portrait page on the same side.
 
 You can accept this knowingly. Nothing breaks: the layout engine still snaps
 every module *within* the content rectangle. But the dots on that side sit
