@@ -1,6 +1,6 @@
 [project]
 name = "journalkit"
-version = "0.2.0"
+version = "0.3.0"
 description = "YAML page templates for a printable, hand-bound journal — laid out on a modular grid, rendered to print-ready SVG and PDF"
 readme = "README.md"
 license = "BSD-3-Clause"
