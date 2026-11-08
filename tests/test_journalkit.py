@@ -633,6 +633,51 @@ def test_month_grid_is_built_in():
                for x1, y1, x2, y2 in lines)
 
 
+def test_month_grid_rejects_bad_options_and_takes_units():
+    from journalkit.svg import Canvas
+
+    ctx = _context()
+    for bad in ({"number": "boxes"}, {"headers": "MTWTFSS"}):
+        try:
+            build(dict(type="month_grid", **bad), ctx).draw(Canvas(200, 200), Rect(0, 0, 140, 80))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("month_grid accepted %r" % (bad,))
+
+    # A date slot sized in inches is the same slot sized in millimetres.
+    def slot_svg(size):
+        canvas = Canvas(200, 200)
+        build({"type": "month_grid", "number_size": size}, ctx).draw(canvas, Rect(0, 0, 140, 80))
+        return canvas.to_svg()
+    assert slot_svg(["0.25in", "4mm"]) == slot_svg([6.35, 4])
+
+
+def test_landscape_dot_origin_override_is_in_turned_coordinates():
+    document = _landscape_document("right")
+    _, ctx = Renderer(document).render_page(document.pages[0])
+    # An origin given by a module on its side is a point as the module sees
+    # it: the lattice passes through u ≡ 0, v ≡ 1 in turned coordinates.
+    points = list(ctx.dot_points(ctx.content, origin=(0, 1)))
+    assert points
+    for u, v in points:
+        assert close(u % 4, 0) or close(u % 4, 4)
+        assert close((v - 1) % 4, 0) or close((v - 1) % 4, 4)
+
+
+def test_landscape_debug_overlay_is_drawn_on_the_sheet():
+    document = _landscape_document("right")
+    renderer = Renderer(document, debug=True)
+    canvas, ctx = renderer.render_page(document.pages[0])
+    svg = canvas.to_svg()
+    overlay = svg.split("debug overlay")[1].split("</g>")[0]
+    xs = [float(x) for x in re.findall(r'<line x1="([\d.]+)" y1="0"', overlay)]
+    assert xs and all(close(x % document.grid, 0) or close(x % document.grid, document.grid)
+                      for x in xs), "debug grid lines sit on the sheet's module grid"
+    # Drawn on the sheet, before (outside) the turned content group.
+    assert svg.index("debug overlay") < svg.index('transform="matrix(')
+
+
 # --------------------------------------------------------------------------
 if __name__ == "__main__":
     failures = 0

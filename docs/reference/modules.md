@@ -166,9 +166,9 @@ side.
 |---|---|---|
 | `weeks` | `5` | number of week rows |
 | `headers` | `[MON, TUE, WED, THU, FRI, SAT, SUN]` | day names, left to right; their count sets the columns |
-| `header_height` | two module grids | the day-name row above the frame |
+| `header_height` | two module grids | the day-name row above the frame; `0` drops the day names |
 | `number` | `corner` | date slot: `corner` (an L closing the corner), `box`, `tick` (just the divider), `none` |
-| `number_size` | `[6, 4]` | slot width and height |
+| `number_size` | `[6, 4]` | slot width and height, as lengths |
 | `dots` | | dot grid in each week, kept off the rules and the date slots |
 
 ```yaml

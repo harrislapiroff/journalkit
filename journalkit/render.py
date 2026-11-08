@@ -108,11 +108,13 @@ class RenderContext:
         a label leaves the surviving dots on the same lattice.
 
         On a landscape page ``rect`` and ``exclude`` are in the turned
-        coordinates modules draw in; the lattice is still the sheet's, so the
-        dots line up with the facing page.
+        coordinates modules draw in, and so is an ``origin`` override; the
+        lattice is still the sheet's, so the dots line up with the facing page.
         """
         frame = self.frame
         if frame is not None and frame.turn:
+            if origin is not None:
+                origin = frame.to_page(*origin)
             rect = frame.rect_to_page(rect)
             exclude = [frame.rect_to_page(r) for r in exclude]
             for x, y in self._lattice(rect, spacing, origin, inset, exclude):
@@ -288,16 +290,18 @@ class Renderer:
         # binding stays beside the binding), so they never turn with the page.
         sheet = ctx if not frame.turn else self._context(page_spec, theme, sheet_page,
                                                          sheet_content)
+        sheet.warnings = ctx.warnings   # one list, whichever context warned
 
         canvas = Canvas(self.doc.width, self.doc.height, self.background)
+        # The module grid is anchored to the sheet, so the overlay is too.
+        if self.debug:
+            self._draw_debug(canvas, sheet, sheet_page, sheet_content)
         decorations = list(self.doc.decorations) + list(page_spec.decorations)
         self._draw_decorations(canvas, sheet, decorations, sheet_page, sheet_content, above=False)
 
         if frame.turn:
             canvas.comment("landscape: drawn turned %+d degrees" % frame.turn)
             canvas.open_group(transform=frame.transform)
-        if self.debug:
-            self._draw_debug(canvas, ctx, page, content)
         if page_spec.content:
             canvas.comment("content")
             children = [build(spec, ctx) for spec in page_spec.content]
@@ -308,8 +312,7 @@ class Renderer:
 
         self._draw_decorations(canvas, sheet, decorations, sheet_page, sheet_content, above=True)
 
-        warnings = ctx.warnings + (sheet.warnings if sheet is not ctx else [])
-        for message in warnings:
+        for message in ctx.warnings:
             self.warnings.append("%s: %s" % (page_spec.name, message))
         return canvas, ctx
 

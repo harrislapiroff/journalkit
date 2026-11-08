@@ -103,7 +103,9 @@ for a page read with the book on its side and the binding at the bottom:
 clockwise on a recto, anticlockwise on a verso. The content rectangle the
 modules see is the text block turned with it. Margins (`inner` stays the
 binding side), decorations and the dot lattice are not turned; they belong
-to the physical sheet. See [choosing a page and
+to the physical sheet. (A module's own `dots: {origin: …}` override is the
+exception: like everything else a module is given, it is read in the turned
+coordinates.) See [choosing a page and
 grid](../guide/page-and-grid.md#landscape-pages).
 
 ## Modules in `content`
