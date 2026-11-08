@@ -57,6 +57,22 @@ lands 4 mm into the binding margin on both sides of the spread without
 changing. `left` and `right` anchors, by contrast, stay put; use them for
 things that must not mirror.
 
+## Landscape pages turn with the side
+
+A template with `orientation: landscape` is read with the book on its side,
+binding at the bottom. Which way the content turns follows from the side —
+clockwise on a recto, anticlockwise on a verso — so the same template is
+still written once. The margins do not turn: `inner` is still the binding
+margin, and decorations anchored to it stay beside the binding. Modules
+are not told the orientation either; they get an upright rectangle in the
+turned coordinates and draw in it as usual.
+
+Each landscape page is read on its own. A recto and a verso turn opposite
+ways (each puts its own binding at the bottom), so two facing landscape
+pages are not one spread: turning the book to read one leaves the other
+upside down. That suits single leaves in a binder; a landscape spread across
+both pages is not supported.
+
 ## Consequences
 
 - One template per page design.

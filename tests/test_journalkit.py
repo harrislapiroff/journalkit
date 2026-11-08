@@ -18,7 +18,7 @@ from journalkit import spec  # noqa: E402
 from journalkit.geometry import Rect  # noqa: E402
 from journalkit.layout import layout_stack  # noqa: E402
 from journalkit.modules import build  # noqa: E402
-from journalkit.render import RenderContext, Renderer, resolve_placement  # noqa: E402
+from journalkit.render import Frame, RenderContext, Renderer, resolve_placement  # noqa: E402
 from journalkit.project import Project  # noqa: E402
 from journalkit.units import mm, snap  # noqa: E402
 
@@ -520,6 +520,216 @@ pages:
     document = spec.load(path)
     assert len(document.pages) == 3
     assert document.pages[0].name == "plain-01"
+
+
+# --------------------------------------------------------------------------
+def test_frame_round_trips_and_puts_the_binding_at_the_bottom():
+    for side, binding_x in (("right", 0.0), ("left", 105.0)):
+        frame = Frame.for_page(105, 170, side, "landscape")
+        width, height = frame.size
+        assert (width, height) == (170, 105)
+        for u, v in ((0, 0), (12.5, 40), (170, 105)):
+            back = frame.to_local(*frame.to_page(u, v))
+            assert close(back[0], u) and close(back[1], v)
+        # The bottom edge of the turned drawing lies along the binding.
+        assert close(frame.to_page(30, height)[0], binding_x)
+        assert close(frame.to_page(150, height)[0], binding_x)
+    assert Frame.for_page(105, 170, "right", "portrait").transform is None
+
+
+def _load_source(source):
+    """Load a document from YAML text, leaving no file behind."""
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = Path(tmp) / "doc.yaml"
+        path.write_text(source)
+        return spec.load(path)
+
+
+def _landscape_document(side="right"):
+    return _load_source("""
+document: land
+page: {size: [105, 170], margins: {top: 2, bottom: 8, inner: 16, outer: 5}}
+grid: {module: 2, dots: {spacing: 4, origin: [0, 2]}}
+decorations: [{type: rule, edge: inner, offset: 4}]
+templates:
+  cal:
+    side: %s
+    orientation: landscape
+    content: [{type: box, height: fill, dots: true}]
+""" % side)
+
+
+def test_landscape_turns_the_content_but_not_the_sheet():
+    for side in ("right", "left"):
+        document = _landscape_document(side)
+        renderer = Renderer(document)
+        page_spec = document.pages[0]
+        _, sheet = renderer.sheet_rect(page_spec)
+        page, content = renderer.content_rect(page_spec)
+        # Modules lay out across the long side…
+        assert (page.w, page.h) == (document.height, document.width)
+        assert close(content.w, sheet.h) and close(content.h, sheet.w)
+        # …and land back exactly on the margins of the sheet.
+        assert renderer.frame(page_spec).rect_to_page(content) == sheet
+
+        svg = renderer.render_all()[0][1]
+        assert 'transform="matrix(' in svg
+        # The binding rule is sheet furniture: drawn outside the turned group,
+        # in the binding margin, exactly where a portrait page puts it.
+        before = svg.split('transform="matrix(')[0]
+        x = float(re.search(r'<line x1="([\d.]+)"', before).group(1))
+        expected = sheet.x - 4 if side == "right" else sheet.right + 4
+        assert close(x, expected)
+
+
+def test_landscape_dots_stay_on_the_sheet_lattice():
+    document = _landscape_document("right")
+    renderer = Renderer(document)
+    _, ctx = renderer.render_page(document.pages[0])
+    frame = ctx.frame
+    points = list(ctx.dot_points(ctx.content))
+    assert points
+    for u, v in points:
+        assert ctx.content.contains_point(u, v)
+        x, y = frame.to_page(u, v)
+        assert close(x % 4, 0) or close(x % 4, 4)
+        assert close((y - 2) % 4, 0) or close((y - 2) % 4, 4)
+
+
+def test_unknown_orientation_is_an_error():
+    try:
+        _load_source("templates: {p: {orientation: sideways, content: []}}")
+    except ValueError as exc:
+        assert "sideways" in str(exc)
+    else:
+        raise AssertionError("an unknown orientation should not load")
+
+
+def test_grid_check_measures_landscape_against_the_sheet():
+    from journalkit.checks import check_grid
+    import tempfile
+
+    # The recto's margins (16 and 5 on a 105mm sheet) put its text block on
+    # the 2mm lattice at x=16; turned coordinates count from the far edge,
+    # where it is 5mm in. Only the verso, whose left margin is 5, is askew.
+    with tempfile.TemporaryDirectory() as tmp:
+        notes = {}
+        for side in ("right", "left"):
+            path = Path(tmp) / ("%s.yaml" % side)
+            path.write_text("""
+page: {size: [105, 170], margins: {top: 2, bottom: 8, inner: 16, outer: 5}}
+grid: {module: 2}
+templates: {cal: {side: %s, orientation: landscape, content: [{type: box, height: fill}]}}
+""" % side)
+            lines = []
+            assert check_grid([path], out=lines.append) == 0
+            notes[side] = [line for line in lines if "off the lattice" in line]
+        assert not notes["right"], notes["right"]
+        assert notes["left"] and "x+1.00" in notes["left"][0]
+
+
+def test_month_grid_is_built_in():
+    from journalkit.modules import REGISTRY
+
+    assert "month_grid" in REGISTRY
+    document = spec.load(EXAMPLE / "templates" / "monthly.yaml")
+    document.theme = document.theme.derive({"font": {"outline": False}})
+    renderer = Renderer(document)
+    page_spec = next(p for p in document.pages if p.orientation == "landscape")
+    canvas, ctx = renderer.render_page(page_spec)
+    svg = canvas.to_svg()
+    for day in ("MON", "SUN"):
+        assert ">%s<" % day in svg
+
+    # Weeks are divided by full-width rules; days by nothing but date slots.
+    grid = build({"type": "month_grid", "weeks": 6, "number": "none"}, ctx)
+    from journalkit.svg import Canvas
+
+    bare = Canvas(200, 200)
+    grid.draw(bare, Rect(0, 0, 140, 80))
+    lines = re.findall(r'<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"',
+                       bare.to_svg())
+    assert len(lines) == 5
+    assert all(close(float(y1), float(y2)) and close(float(x2) - float(x1), 140)
+               for x1, y1, x2, y2 in lines)
+
+
+def test_month_grid_rejects_bad_options_and_takes_units():
+    from journalkit.svg import Canvas
+
+    ctx = _context()
+    for bad in ({"number": "boxes"}, {"headers": "MTWTFSS"}):
+        try:
+            build(dict(type="month_grid", **bad), ctx).draw(Canvas(200, 200), Rect(0, 0, 140, 80))
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("month_grid accepted %r" % (bad,))
+
+    # A date slot sized in inches is the same slot sized in millimetres.
+    def slot_svg(size):
+        canvas = Canvas(200, 200)
+        build({"type": "month_grid", "number_size": size}, ctx).draw(canvas, Rect(0, 0, 140, 80))
+        return canvas.to_svg()
+    assert slot_svg(["0.25in", "4mm"]) == slot_svg([6.35, 4])
+
+
+def test_landscape_dot_origin_override_is_in_turned_coordinates():
+    document = _landscape_document("right")
+    _, ctx = Renderer(document).render_page(document.pages[0])
+    # An origin given by a module on its side is a point as the module sees
+    # it: the lattice passes through u ≡ 0, v ≡ 1 in turned coordinates.
+    points = list(ctx.dot_points(ctx.content, origin=(0, 1)))
+    assert points
+    for u, v in points:
+        assert close(u % 4, 0) or close(u % 4, 4)
+        assert close((v - 1) % 4, 0) or close((v - 1) % 4, 4)
+
+
+def test_landscape_debug_overlay_is_drawn_on_the_sheet():
+    document = _landscape_document("right")
+    renderer = Renderer(document, debug=True)
+    canvas, ctx = renderer.render_page(document.pages[0])
+    svg = canvas.to_svg()
+    overlay = svg.split("debug overlay")[1].split("</g>")[0]
+    xs = [float(x) for x in re.findall(r'<line x1="([\d.]+)" y1="0"', overlay)]
+    assert xs and all(close(x % document.grid, 0) or close(x % document.grid, document.grid)
+                      for x in xs), "debug grid lines sit on the sheet's module grid"
+    # Drawn on the sheet, before (outside) the turned content group.
+    assert svg.index("debug overlay") < svg.index('transform="matrix(')
+
+
+def test_month_grid_slots_stay_in_their_cell_and_tick_clears_little():
+    from journalkit.svg import Canvas
+
+    ctx = _context()
+    # Fourteen columns 5mm wide: the default 6mm slot must shrink to fit.
+    canvas = Canvas(200, 200)
+    build({"type": "month_grid", "headers": ["X"] * 14, "number": "box"},
+          ctx).draw(canvas, Rect(0, 0, 70, 60))
+    for x1, _, x2, _ in re.findall(r'<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"',
+                                   canvas.to_svg()):
+        if not close(float(x2) - float(x1), 70):        # not a week rule
+            assert float(x2) - float(x1) <= 5 + 1e-6
+
+    # A tick leaves far more dots than a full slot does.
+    def dot_count(style):
+        canvas = Canvas(200, 200)
+        build({"type": "month_grid", "number": style, "dots": True},
+              ctx).draw(canvas, Rect(25, 25, 140, 80))
+        return canvas.to_svg().count("<circle")
+    assert dot_count("tick") > dot_count("corner")
+
+
+def test_month_grid_warns_when_a_day_name_overflows():
+    from journalkit.svg import Canvas
+
+    ctx = _context()
+    build({"type": "month_grid", "headers": ["WEDNESDAY"] * 7},
+          ctx).draw(Canvas(200, 200), Rect(0, 0, 70, 60))
+    assert any("WEDNESDAY" in w for w in ctx.warnings)
 
 
 # --------------------------------------------------------------------------

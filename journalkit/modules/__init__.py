@@ -11,5 +11,6 @@ from .base import REGISTRY, Module, build, register  # noqa: F401
 from . import containers  # noqa: F401  (registers stack, row)
 from . import core  # noqa: F401  (registers box, fields, heading, ...)
 from . import trackers  # noqa: F401  (registers habit_grid)
+from . import calendars  # noqa: F401  (registers month_grid)
 
 __all__ = ["REGISTRY", "Module", "build", "register"]

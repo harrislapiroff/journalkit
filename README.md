@@ -211,6 +211,25 @@ right. Specifying `left:`/`right:` explicitly disables mirroring.
 Modules never see which side they're on — mirroring is resolved once, when the
 content rect is computed.
 
+### Landscape pages
+
+`orientation: landscape` on a template turns its content a quarter turn, so
+the book is read on its side with the binding at the bottom: a recto's
+content is turned clockwise, a verso's anticlockwise. Modules lay out across
+the long side as if the page were simply wider than it is tall; margins,
+decorations and the dot lattice stay with the physical sheet, so the binding
+rule stays by the binding and dots still line up with the facing page.
+
+```yaml
+templates:
+  month:
+    side: right
+    orientation: landscape      # portrait (default) | landscape
+    content:
+      - {type: fields, columns: [{label: MONTH/YEAR, width: 50}, {label: THEME}]}
+      - {type: month_grid, height: fill}
+```
+
 ### Decorations
 
 Page furniture that sits outside the content flow, e.g. the vertical rule 4 mm
@@ -287,6 +306,7 @@ project's `modules/` adds.
 | `text` | a line of free text |
 | `spacer` | empty space; `height: fill` pushes what follows down |
 | `habit_grid` | habit tracker: one labelled row per habit, one marker per day |
+| `month_grid` | blank month calendar: day names, week rows, a date slot per day |
 | `row`, `stack` | containers |
 
 ## Icons
@@ -424,7 +444,7 @@ journalkit/         the library — what `pipx install journalkit` ships
   watch.py          rebuild-on-change and stdin preview
   modules/          module registry and the built-in library
   scaffold/         what `journalkit init` copies into a new project
-examples/journal/   a complete two-document project
+examples/journal/   a complete three-document project
 tools/
   dev.py            repo-only tasks: test, smoke, clean, geom, ink, pages
   extract_icons.py  icon extraction helper

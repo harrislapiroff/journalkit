@@ -6,7 +6,7 @@ project adds.
 
 <figure markdown>
 ![Every built-in module on one page](../assets/screens/modules-gallery.png){ .page width="360" }
-<figcaption>The built-ins, top to bottom: <code>fields</code>, <code>heading</code>, <code>rating</code>, <code>box</code>, <code>dotfield</code>, <code>checklist</code>, <code>lines</code>, <code>habit_grid</code>, <code>rule</code>, <code>text</code>, and a <code>row</code> of two boxes.</figcaption>
+<figcaption>The built-ins, top to bottom: <code>fields</code>, <code>heading</code>, <code>rating</code>, <code>box</code>, <code>dotfield</code>, <code>checklist</code>, <code>lines</code>, <code>habit_grid</code>, <code>rule</code>, <code>text</code>, and a <code>row</code> of two boxes. <code>month_grid</code> wants a landscape page of its own; it is pictured <a href="#month_grid">below</a>.</figcaption>
 </figure>
 
 Lengths are millimetres unless suffixed. Any value may be a `$theme.<path>`
@@ -151,6 +151,36 @@ gets a rule to write on instead of a label.
   habits: [Move, Read, "", ""]
   label_width: 42
   row_height: 4
+```
+
+## `month_grid`
+
+A blank month calendar to date by hand: day names above a frame, weeks
+divided by full-width rules, and a small slot in each day's top-right corner
+for the date. There are no rules between days, so a note can run across
+several of them. No intrinsic height; it is meant for a [landscape
+page](document.md#templates-and-pages), where the seven columns get the long
+side.
+
+<figure markdown>
+![A landscape month page: a MONTH/YEAR and THEME field row over a five-week month_grid](../assets/screens/example-monthly.png){ .page width="300" }
+<figcaption>The example journal's <code>monthly.yaml</code>: a <code>fields</code> row and a <code>month_grid</code> on a landscape recto. Turn the page so the binding is at the bottom to read it.</figcaption>
+</figure>
+
+| parameter | default | |
+|---|---|---|
+| `weeks` | `5` | number of week rows |
+| `headers` | `[MON, TUE, WED, THU, FRI, SAT, SUN]` | day names, left to right; their count sets the columns. A name wider than its column warns |
+| `header_height` | two module grids | the day-name row above the frame; `0` drops the day names |
+| `number` | `corner` | date slot: `corner` (an L closing the corner), `box`, `tick` (just the divider), `none` |
+| `number_size` | `[6, 4]` | slot width and height, as lengths; never more than one day's cell |
+| `dots` | | dot grid in each week, kept off the rules and the date slots |
+
+```yaml
+- type: month_grid
+  height: fill
+  weeks: 6
+  headers: [SUN, MON, TUE, WED, THU, FRI, SAT]
 ```
 
 ## `lines`

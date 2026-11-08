@@ -10,7 +10,83 @@ from .icons import IconSet
 from .layout import layout_stack
 from .modules import build
 from .svg import Canvas
-from .units import mm, snap
+from .units import fmt, mm, snap
+
+
+@dataclass(frozen=True)
+class Frame:
+    """Maps the coordinates modules draw in onto the physical sheet.
+
+    A portrait page draws straight onto the sheet. A landscape page is drawn
+    in a turned coordinate system — ``u`` across, ``v`` down, as the reader
+    sees it with the binding at the bottom — and placed on the sheet with one
+    rotation. ``turn`` is how far that drawing is rotated on the sheet: 90
+    (clockwise) for a recto, whose binding is on the left; -90 for a verso.
+
+    Margins, decorations and the dot lattice belong to the sheet, so they
+    are worked out in sheet coordinates and converted with this.
+    """
+
+    width: float          # the sheet, in mm
+    height: float
+    turn: int = 0
+
+    @classmethod
+    def for_page(cls, width: float, height: float, side: str, orientation: str) -> "Frame":
+        if orientation == "landscape":
+            return cls(width, height, -90 if side == "left" else 90)
+        return cls(width, height, 0)
+
+    @property
+    def size(self) -> tuple[float, float]:
+        """Width and height as the modules see them."""
+        return (self.height, self.width) if self.turn else (self.width, self.height)
+
+    @property
+    def transform(self) -> str | None:
+        """The SVG transform taking local coordinates onto the sheet.
+
+        The matrices are :meth:`to_page` written as SVG's
+        ``matrix(a, b, c, d, e, f)``, i.e. ``x = a·u + c·v + e`` and
+        ``y = b·u + d·v + f``. Keep the two in step.
+        """
+        if self.turn == 90:
+            return "matrix(0,1,-1,0,%s,0)" % fmt(self.width)
+        if self.turn == -90:
+            return "matrix(0,-1,1,0,0,%s)" % fmt(self.height)
+        return None
+
+    def to_page(self, u: float, v: float) -> tuple[float, float]:
+        """Local ``(u, v)`` to sheet ``(x, y)``.
+
+        Turned 90: local ``u`` runs down the sheet and local ``v`` runs from
+        the outer edge in towards the binding, so local top is the outer
+        edge and local bottom the binding. Turned -90 is the mirror image.
+        """
+        if self.turn == 90:
+            return self.width - v, u
+        if self.turn == -90:
+            return v, self.height - u
+        return u, v
+
+    def to_local(self, x: float, y: float) -> tuple[float, float]:
+        """Sheet ``(x, y)`` to local ``(u, v)``; the inverse of :meth:`to_page`."""
+        if self.turn == 90:
+            return y, self.width - x
+        if self.turn == -90:
+            return self.height - y, x
+        return x, y
+
+    def _rect(self, rect: Rect, convert) -> Rect:
+        x1, y1 = convert(rect.x, rect.y)
+        x2, y2 = convert(rect.right, rect.bottom)
+        return Rect(min(x1, x2), min(y1, y2), abs(x2 - x1), abs(y2 - y1))
+
+    def rect_to_page(self, rect: Rect) -> Rect:
+        return self._rect(rect, self.to_page)
+
+    def rect_to_local(self, rect: Rect) -> Rect:
+        return self._rect(rect, self.to_local)
 
 
 @dataclass
@@ -27,6 +103,10 @@ class RenderContext:
     side: str
     debug: bool = False
     warnings: list = field(default_factory=list)
+    #: How ``page``/``content`` (and everything modules draw) map onto the
+    #: sheet. The renderer always sets one; ``frame.turn == 0`` is portrait.
+    #: ``None`` (a context built by hand, as in tests) is treated as portrait.
+    frame: Frame | None = None
 
     def warn(self, message: str) -> None:
         self.warnings.append(message)
@@ -39,7 +119,23 @@ class RenderContext:
         keeps dots lined up across every module on the page.  ``exclude`` drops
         individual points without shifting the rest, so knocking a hole out for
         a label leaves the surviving dots on the same lattice.
+
+        On a landscape page ``rect`` and ``exclude`` are in the turned
+        coordinates modules draw in, and so is an ``origin`` override; the
+        lattice is still the sheet's, so the dots line up with the facing page.
         """
+        frame = self.frame
+        if frame is not None and frame.turn:
+            if origin is not None:
+                origin = frame.to_page(*origin)
+            rect = frame.rect_to_page(rect)
+            exclude = [frame.rect_to_page(r) for r in exclude]
+            for x, y in self._lattice(rect, spacing, origin, inset, exclude):
+                yield frame.to_local(x, y)
+            return
+        yield from self._lattice(rect, spacing, origin, inset, exclude)
+
+    def _lattice(self, rect, spacing, origin, inset, exclude):
         spacing = spacing or self.dots.spacing
         ox, oy = origin or self.dots.origin
         area = rect.inset(inset) if inset else rect
@@ -160,17 +256,30 @@ class Renderer:
         self.icons = IconSet(document.icon_dirs)
         self.warnings: list[str] = []
 
-    def content_rect(self, page_spec) -> tuple[Rect, Rect]:
+    def frame(self, page_spec) -> Frame:
+        return Frame.for_page(self.doc.width, self.doc.height, page_spec.side,
+                              page_spec.orientation)
+
+    def sheet_rect(self, page_spec) -> tuple[Rect, Rect]:
+        """The page and text block on the physical sheet, margins applied."""
         page = Rect(0.0, 0.0, self.doc.width, self.doc.height)
         margins = page_spec.margins or self.doc.margins
         top, right, bottom, left = margins.for_side(page_spec.side)
         content = Rect(left, top, self.doc.width - left - right, self.doc.height - top - bottom)
         return page, content
 
-    def render_page(self, page_spec) -> tuple[Canvas, RenderContext]:
-        page, content = self.content_rect(page_spec)
-        theme = self.doc.theme.derive(page_spec.theme)
-        ctx = RenderContext(
+    def content_rect(self, page_spec) -> tuple[Rect, Rect]:
+        """The page and text block as the page's modules see them.
+
+        The same as :meth:`sheet_rect` for a portrait page; turned for a
+        landscape one, so its content is laid out across the long side.
+        """
+        page, content = self.sheet_rect(page_spec)
+        frame = self.frame(page_spec)
+        return frame.rect_to_local(page), frame.rect_to_local(content)
+
+    def _context(self, page_spec, theme, page, content, frame, warnings=None) -> RenderContext:
+        return RenderContext(
             theme=theme,
             icons=self.icons,
             grid=self.doc.grid,
@@ -180,22 +289,44 @@ class Renderer:
             content=content,
             side=page_spec.side,
             debug=self.debug,
+            frame=frame,
+            warnings=[] if warnings is None else warnings,
         )
 
+    def render_page(self, page_spec) -> tuple[Canvas, RenderContext]:
+        """Render one page; returns the canvas and the context its content saw."""
+        theme = self.doc.theme.derive(page_spec.theme)
+        frame = self.frame(page_spec)
+        sheet_page, sheet_content = self.sheet_rect(page_spec)
+        page, content = self.content_rect(page_spec)
+        ctx = self._context(page_spec, theme, page, content, frame)
+        # Decorations are furniture of the physical sheet (a rule beside the
+        # binding stays beside the binding), so they never turn with the page.
+        # Callers read warnings off the context this returns, so a warning
+        # raised while drawing decorations has to land in the same list.
+        sheet = ctx if not frame.turn else self._context(
+            page_spec, theme, sheet_page, sheet_content,
+            Frame(self.doc.width, self.doc.height), warnings=ctx.warnings)
+
         canvas = Canvas(self.doc.width, self.doc.height, self.background)
+        # The module grid is anchored to the sheet, so the overlay is too.
         if self.debug:
-            self._draw_debug(canvas, ctx, page, content)
-
+            self._draw_debug(canvas, sheet, sheet_page, sheet_content)
         decorations = list(self.doc.decorations) + list(page_spec.decorations)
-        self._draw_decorations(canvas, ctx, decorations, page, content, above=False)
+        self._draw_decorations(canvas, sheet, decorations, sheet_page, sheet_content, above=False)
 
+        if frame.turn:
+            canvas.comment("landscape: drawn turned %+d degrees" % frame.turn)
+            canvas.open_group(transform=frame.transform)
         if page_spec.content:
             canvas.comment("content")
             children = [build(spec, ctx) for spec in page_spec.content]
             for placement in layout_stack(children, content, ctx.default_gap, ctx.grid, ctx):
                 placement.module.draw(canvas, placement.rect)
+        if frame.turn:
+            canvas.close_group()
 
-        self._draw_decorations(canvas, ctx, decorations, page, content, above=True)
+        self._draw_decorations(canvas, sheet, decorations, sheet_page, sheet_content, above=True)
 
         for message in ctx.warnings:
             self.warnings.append("%s: %s" % (page_spec.name, message))

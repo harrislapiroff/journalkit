@@ -13,8 +13,8 @@ content width and a height decided as follows.
 
 Modules with an intrinsic height: `heading` (7.5 mm), `fields` (5 mm),
 `rating` (5 mm), `checklist` and `habit_grid` (from their rows), and `text`,
-`rule` and `spacer` (one grid step). `box`, `dotfield` and `lines` have none
-and fill by default.
+`rule` and `spacer` (one grid step). `box`, `dotfield`, `lines` and
+`month_grid` have none and fill by default.
 
 ## Gaps
 
