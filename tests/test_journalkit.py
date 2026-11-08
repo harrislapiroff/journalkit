@@ -18,7 +18,7 @@ from journalkit import spec  # noqa: E402
 from journalkit.geometry import Rect  # noqa: E402
 from journalkit.layout import layout_stack  # noqa: E402
 from journalkit.modules import build  # noqa: E402
-from journalkit.render import RenderContext, Renderer, resolve_placement  # noqa: E402
+from journalkit.render import Frame, RenderContext, Renderer, resolve_placement  # noqa: E402
 from journalkit.project import Project  # noqa: E402
 from journalkit.units import mm, snap  # noqa: E402
 
@@ -520,6 +520,117 @@ pages:
     document = spec.load(path)
     assert len(document.pages) == 3
     assert document.pages[0].name == "plain-01"
+
+
+# --------------------------------------------------------------------------
+def test_frame_round_trips_and_puts_the_binding_at_the_bottom():
+    for side, binding_x in (("right", 0.0), ("left", 105.0)):
+        frame = Frame.for_page(105, 170, side, "landscape")
+        width, height = frame.size
+        assert (width, height) == (170, 105)
+        for u, v in ((0, 0), (12.5, 40), (170, 105)):
+            back = frame.to_local(*frame.to_page(u, v))
+            assert close(back[0], u) and close(back[1], v)
+        # The bottom edge of the turned drawing lies along the binding.
+        assert close(frame.to_page(30, height)[0], binding_x)
+        assert close(frame.to_page(150, height)[0], binding_x)
+    assert Frame.for_page(105, 170, "right", "portrait").transform is None
+
+
+def _landscape_document(side="right"):
+    import tempfile
+
+    source = """
+document: land
+page: {size: [105, 170], margins: {top: 2, bottom: 8, inner: 16, outer: 5}}
+grid: {module: 2, dots: {spacing: 4, origin: [0, 2]}}
+decorations: [{type: rule, edge: inner, offset: 4}]
+templates:
+  cal:
+    side: %s
+    orientation: landscape
+    content: [{type: box, height: fill, dots: true}]
+""" % side
+    with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as handle:
+        handle.write(source)
+    return spec.load(handle.name)
+
+
+def test_landscape_turns_the_content_but_not_the_sheet():
+    for side in ("right", "left"):
+        document = _landscape_document(side)
+        renderer = Renderer(document)
+        page_spec = document.pages[0]
+        _, sheet = renderer.sheet_rect(page_spec)
+        page, content = renderer.content_rect(page_spec)
+        # Modules lay out across the long side…
+        assert (page.w, page.h) == (document.height, document.width)
+        assert close(content.w, sheet.h) and close(content.h, sheet.w)
+        # …and land back exactly on the margins of the sheet.
+        assert renderer.frame(page_spec).rect_to_page(content) == sheet
+
+        svg = renderer.render_all()[0][1]
+        assert 'transform="matrix(' in svg
+        # The binding rule is sheet furniture: drawn outside the turned group,
+        # in the binding margin, exactly where a portrait page puts it.
+        before = svg.split('transform="matrix(')[0]
+        x = float(re.search(r'<line x1="([\d.]+)"', before).group(1))
+        expected = sheet.x - 4 if side == "right" else sheet.right + 4
+        assert close(x, expected)
+
+
+def test_landscape_dots_stay_on_the_sheet_lattice():
+    document = _landscape_document("right")
+    renderer = Renderer(document)
+    _, ctx = renderer.render_page(document.pages[0])
+    frame = ctx.frame
+    points = list(ctx.dot_points(ctx.content))
+    assert points
+    for u, v in points:
+        assert ctx.content.contains_point(u, v)
+        x, y = frame.to_page(u, v)
+        assert close(x % 4, 0) or close(x % 4, 4)
+        assert close((y - 2) % 4, 0) or close((y - 2) % 4, 4)
+
+
+def test_unknown_orientation_is_an_error():
+    import tempfile
+
+    source = "templates: {p: {orientation: sideways, content: []}}"
+    with tempfile.NamedTemporaryFile("w", suffix=".yaml", delete=False) as handle:
+        handle.write(source)
+    try:
+        spec.load(handle.name)
+    except ValueError as exc:
+        assert "sideways" in str(exc)
+    else:
+        raise AssertionError("an unknown orientation should not load")
+
+
+def test_month_grid_is_built_in():
+    from journalkit.modules import REGISTRY
+
+    assert "month_grid" in REGISTRY
+    document = spec.load(EXAMPLE / "templates" / "monthly.yaml")
+    document.theme = document.theme.derive({"font": {"outline": False}})
+    renderer = Renderer(document)
+    page_spec = next(p for p in document.pages if p.orientation == "landscape")
+    canvas, ctx = renderer.render_page(page_spec)
+    svg = canvas.to_svg()
+    for day in ("MON", "SUN"):
+        assert ">%s<" % day in svg
+
+    # Weeks are divided by full-width rules; days by nothing but date slots.
+    grid = build({"type": "month_grid", "weeks": 6, "number": "none"}, ctx)
+    from journalkit.svg import Canvas
+
+    bare = Canvas(200, 200)
+    grid.draw(bare, Rect(0, 0, 140, 80))
+    lines = re.findall(r'<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)"',
+                       bare.to_svg())
+    assert len(lines) == 5
+    assert all(close(float(y1), float(y2)) and close(float(x2) - float(x1), 140)
+               for x1, y1, x2, y2 in lines)
 
 
 # --------------------------------------------------------------------------

@@ -1,0 +1,64 @@
+# Monthly spread — a blank calendar you number yourself, and a page to
+# look back on the month.
+#
+#   journalkit build examples/journal --pdf
+#
+# The calendar is a landscape page: turn the book so the binding is at the
+# bottom. Weeks are divided by rules only, so a note can run across days.
+
+document: monthly
+
+page:
+  size: [95, 172]
+  # Even margins, to match the 2mm module grid — see the note in daily.yaml.
+  margins: {top: 2, bottom: 8, inner: 16, outer: 5}
+
+grid:
+  module: 2
+  dots: {spacing: 4, origin: [0, 2], radius: 0.125}
+
+defaults:
+  gap: 2
+
+theme:
+  font: {family: Montserrat}
+  label: {size: 8pt, weight: 500, dy: 4}   # centres the cap in a 6mm row
+  heading: {size: 12pt, weight: 700}
+
+# Decorations belong to the sheet, so this rule stays beside the binding on
+# the landscape page too.
+decorations:
+  - type: rule
+    edge: inner
+    offset: 4
+
+templates:
+
+  month:
+    side: right
+    orientation: landscape
+    content:
+      - type: fields
+        height: 6
+        columns:
+          - {label: MONTH/YEAR, width: 50}
+          - {label: THEME}            # takes the rest
+
+      # `weeks: 6` for a month that spans six; `number: box | tick | none`
+      # changes the date slot in the corner of each day.
+      - type: month_grid
+        height: fill
+        weeks: 5
+
+  month-review:
+    side: left
+    content:
+      - type: box
+        label: MONTH IN REVIEW
+        height: fill
+        dots: true
+        theme: {dots: {reserve_label: text}}
+
+pages:
+  - template: month
+  - template: month-review

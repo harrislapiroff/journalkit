@@ -34,6 +34,24 @@ page:
 `left` and `right` instead to turn mirroring off. `margins: {all: 10}` sets
 all four; named keys override it.
 
+## Landscape pages
+
+A template can be read with the book on its side, binding at the bottom:
+
+```yaml
+templates:
+  month:
+    side: right
+    orientation: landscape
+```
+
+The content is laid out across the long side and turned onto the sheet:
+clockwise on a recto, anticlockwise on a verso, so the binding is at the
+bottom either way. Only the content turns. Margins keep their names and
+their edges, decorations stay where they are on the sheet, and the dot
+lattice is the sheet's, so dots on a landscape page still line up with the
+page facing it.
+
 ## The module grid
 
 Every module's position and size snaps to it. 2.5 mm and 2 mm are both

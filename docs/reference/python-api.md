@@ -29,8 +29,8 @@ private.
     `project: Project`. Property `size -> (width, height)`.
 
 `PageSpec`
-:   Fields: `name`, `side`, `content`, `decorations`, `theme`, `margins`,
-    `gap`.
+:   Fields: `name`, `side`, `orientation`, `content`, `decorations`,
+    `theme`, `margins`, `gap`.
 
 `Margins`
 :   `parse(mapping) -> Margins`; `for_side(side) -> (top, right, bottom, left)`.
@@ -46,15 +46,27 @@ private.
 `Renderer(document, debug=False, background="#ffffff")`
 :   `render_all() -> list[(page_name, svg_text)]`;
     `render_page(page_spec) -> (Canvas, RenderContext)`;
-    `content_rect(page_spec) -> (page: Rect, content: Rect)`;
+    `content_rect(page_spec) -> (page: Rect, content: Rect)`, as the page's
+    modules see them (turned on a landscape page);
+    `sheet_rect(page_spec) -> (page: Rect, content: Rect)`, on the physical sheet;
+    `frame(page_spec) -> Frame`;
     `warnings: list[str]` accumulated across pages; `icons: IconSet`.
 
 `RenderContext`
 :   What a module sees beyond its spec: `theme`, `icons`, `grid`,
-    `default_gap`, `dots`, `page`, `content`, `side`, `debug`, `warnings`.
+    `default_gap`, `dots`, `page`, `content`, `side`, `debug`, `warnings`,
+    `frame` (the page's `Frame`; `None` means portrait).
     Methods `warn(message)`, `dot_points(rect, spacing=None, origin=None,
     inset=0.0, exclude=())`, `draw_dots(canvas, rect, options=None,
     exclude=())`.
+
+`Frame(width, height, turn=0)`
+:   Maps the coordinates a page's modules draw in onto the sheet. `turn` is
+    `0`, `90` (a landscape recto) or `-90` (a landscape verso).
+    `Frame.for_page(width, height, side, orientation)`; `size` as the
+    modules see it; `transform`, the SVG transform for the turned group, or
+    `None`; `to_page(u, v)`, `to_local(x, y)`, `rect_to_page(rect)`,
+    `rect_to_local(rect)`.
 
 `resolve_placement(at, page, content, side) -> Rect`
 :   Turn a decoration's `at:` mapping into a rectangle.

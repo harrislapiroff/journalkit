@@ -153,6 +153,31 @@ gets a rule to write on instead of a label.
   row_height: 4
 ```
 
+## `month_grid`
+
+A blank month calendar to date by hand: day names above a frame, weeks
+divided by full-width rules, and a small slot in each day's top-right corner
+for the date. There are no rules between days, so a note can run across
+several of them. No intrinsic height; it is meant for a [landscape
+page](document.md#templates-and-pages), where the seven columns get the long
+side.
+
+| parameter | default | |
+|---|---|---|
+| `weeks` | `5` | number of week rows |
+| `headers` | `[MON, TUE, WED, THU, FRI, SAT, SUN]` | day names, left to right; their count sets the columns |
+| `header_height` | two module grids | the day-name row above the frame |
+| `number` | `corner` | date slot: `corner` (an L closing the corner), `box`, `tick` (just the divider), `none` |
+| `number_size` | `[6, 4]` | slot width and height |
+| `dots` | | dot grid in each week, kept off the rules and the date slots |
+
+```yaml
+- type: month_grid
+  height: fill
+  weeks: 6
+  headers: [SUN, MON, TUE, WED, THU, FRI, SAT]
+```
+
 ## `lines`
 
 A writing area ruled with horizontal lines. No intrinsic height.

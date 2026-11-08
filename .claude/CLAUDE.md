@@ -29,8 +29,9 @@ Two layers, deliberately:
 - **`tools/dev.py`** is for working on the repo: `test`, `smoke`, `clean`,
   and the measurement tools `geom`, `ink`, `pages`. pipx never installs it.
 
-`examples/journal/` is a real two-document project that the tests and smoke
-run exercise (both grids, mirroring, the habit tracker, packaged icons). Its
+`examples/journal/` is a real three-document project that the tests and smoke
+run exercise (both grids, mirroring, the habit tracker, a landscape page and
+the month grid, packaged icons). Its
 templates are the test fixtures — keep them building.
 
 To drive, screenshot, or verify the renderer, use the `run-journalkit` skill
@@ -67,6 +68,11 @@ git tag v0.3.0 && git push origin v0.3.0
   survivors stay on the lattice (`theme.dots.reserve_label`).
 - **Mirroring is resolved once**, when the content rect is computed from
   `inner`/`outer` margins. No module should ever branch on `side`.
+- **Landscape turns the content, never the sheet.** `orientation: landscape`
+  lays content out in turned coordinates (`render.Frame`) inside one rotated
+  group; margins, decorations and the dot lattice stay in sheet coordinates.
+  `RenderContext.dot_points` converts both ways so landscape dots sit on the
+  sheet's lattice. Modules draw upright and never branch on orientation.
 - **Text is drawn as outlines from the font file.** `Module.text` emits a
   `<path>` built by `fontmetrics.FontMetrics.outline`; the SVG and PDF carry
   no fonts. Montserrat Regular/Medium/Bold are bundled in `journalkit/fonts/`

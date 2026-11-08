@@ -91,6 +91,9 @@ row.
 
 Don't read `ctx.side` to decide how to draw. Mirroring is resolved before
 your module runs, and a template is meant to work on either side unchanged.
+The same goes for landscape pages: your module draws upright in the turned
+coordinates and `rect`, `ctx.content` and `dot_points` are all given in
+them, so a module needs nothing extra to work on its side.
 
 ## Sizing
 

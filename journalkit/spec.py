@@ -27,6 +27,9 @@ PAGE_SIZES = {
     "hobonichi-weeks": (95.0, 188.0),
 }
 
+#: ``landscape`` turns a page's content a quarter turn, binding at the bottom.
+ORIENTATIONS = ("portrait", "landscape")
+
 DEFAULT_MARGINS = {"top": 10.0, "bottom": 10.0, "inner": 15.0, "outer": 10.0}
 
 
@@ -107,6 +110,7 @@ class DotGrid:
 class PageSpec:
     name: str
     side: str = "right"
+    orientation: str = "portrait"
     content: list = field(default_factory=list)
     decorations: list = field(default_factory=list)
     theme: dict | None = None
@@ -213,10 +217,15 @@ def load(path: str | Path, project: Project | None = None) -> Document:
             name = merged.get("name") or template_name or "page"
             if count > 1:
                 name = "%s-%02d" % (name, index + 1)
+            orientation = merged.get("orientation", "portrait")
+            if orientation not in ORIENTATIONS:
+                raise ValueError("page %r: unknown orientation %r (known: %s)"
+                                 % (name, orientation, ", ".join(ORIENTATIONS)))
             pages.append(
                 PageSpec(
                     name=name,
                     side=merged.get("side", "right"),
+                    orientation=orientation,
                     content=merged.get("content", []) or [],
                     decorations=merged.get("decorations", []) or [],
                     theme=merged.get("theme"),
