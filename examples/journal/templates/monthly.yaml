@@ -1,5 +1,5 @@
-# Monthly spread — a blank calendar you number yourself, and a page to
-# look back on the month.
+# Monthly spread — an undated month calendar, numbered by hand so the same
+# template serves every month, and an upright page of notes on the month.
 #
 #   journalkit build examples/journal --pdf
 #

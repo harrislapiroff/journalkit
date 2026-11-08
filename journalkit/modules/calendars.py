@@ -1,12 +1,16 @@
-"""Calendars: blank grids you date by hand.
+"""Calendars: undated grids, numbered by hand.
 
-``month_grid`` is a month you number yourself: day names above a frame,
-weeks divided by full-width rules only. There are no vertical dividers
-between days, so one note can run across several of them. Each day has a
-small slot in its top-right corner for the date.
+Nothing here knows about real dates. A printed calendar is a template that
+is reused for every month, so ``month_grid`` prints the structure and leaves
+the numbers to the writer: one page serves any month, whatever weekday it
+starts on, and a five-week grid can run straight on from the previous month.
 
-It is drawn for a landscape page (``orientation: landscape``), where seven
-columns get the long side, but it works on a portrait page too.
+Weeks are separated by full-width rules, but days within a week are not —
+only a short divider at the top of each column, where the date slot is — so
+an entry spanning several days can be written across them.
+
+Seven columns are cramped across a portrait page; the module is meant for a
+landscape one (``orientation: landscape``), but does not depend on it.
 """
 
 from ..geometry import Rect
@@ -52,9 +56,10 @@ class MonthGrid(Module):
         num_w, num_h = (mm(self.theme.resolve(n)) for n in size)
         col_w = rect.w / columns
 
-        # Day names sit just above the frame, at each column's left edge,
-        # with their baseline a little clear of it. A zero-height header row
-        # means no day names at all.
+        # Day names sit just above the frame, at each column's left edge. The
+        # baseline is 1mm clear of the frame, scaled down for a header too
+        # short to give it that, so descender-free caps never touch the rule.
+        # A zero-height header row means no day names at all.
         if header_h > 0:
             label_dx = self.theme.mm("label.dx")
             baseline = rect.y + header_h - min(1.0, header_h / 4)
@@ -86,8 +91,10 @@ class MonthGrid(Module):
 
         if self.spec.get("dots"):
             # One band per week, held clear of every rule and the frame, with
-            # that week's date slots knocked out; a dot touching a line reads
-            # as a smudge.
+            # that week's date slots knocked out. Row heights are whatever the
+            # page leaves, not lattice multiples, so a rule can fall anywhere
+            # relative to the dots; 0.8mm is enough that no surviving dot reads
+            # as a smudge on a line (cf. ``theme.dots.label_pad``).
             clear = 0.8
             for week in range(weeks):
                 band = Rect(frame.x, frame.y + week * row_h, frame.w, row_h).inset(clear)

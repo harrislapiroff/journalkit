@@ -44,7 +44,12 @@ class Frame:
 
     @property
     def transform(self) -> str | None:
-        """The SVG transform taking local coordinates onto the sheet."""
+        """The SVG transform taking local coordinates onto the sheet.
+
+        The matrices are :meth:`to_page` written as SVG's
+        ``matrix(a, b, c, d, e, f)``, i.e. ``x = a·u + c·v + e`` and
+        ``y = b·u + d·v + f``. Keep the two in step.
+        """
         if self.turn == 90:
             return "matrix(0,1,-1,0,%s,0)" % fmt(self.width)
         if self.turn == -90:
@@ -52,6 +57,12 @@ class Frame:
         return None
 
     def to_page(self, u: float, v: float) -> tuple[float, float]:
+        """Local ``(u, v)`` to sheet ``(x, y)``.
+
+        Turned 90: local ``u`` runs down the sheet and local ``v`` runs from
+        the outer edge in towards the binding, so local top is the outer
+        edge and local bottom the binding. Turned -90 is the mirror image.
+        """
         if self.turn == 90:
             return self.width - v, u
         if self.turn == -90:
@@ -59,6 +70,7 @@ class Frame:
         return u, v
 
     def to_local(self, x: float, y: float) -> tuple[float, float]:
+        """Sheet ``(x, y)`` to local ``(u, v)``; the inverse of :meth:`to_page`."""
         if self.turn == 90:
             return y, self.width - x
         if self.turn == -90:
@@ -290,7 +302,9 @@ class Renderer:
         # binding stays beside the binding), so they never turn with the page.
         sheet = ctx if not frame.turn else self._context(page_spec, theme, sheet_page,
                                                          sheet_content)
-        sheet.warnings = ctx.warnings   # one list, whichever context warned
+        # Callers read warnings off the context this returns, so a warning
+        # raised while drawing decorations has to land in the same list.
+        sheet.warnings = ctx.warnings
 
         canvas = Canvas(self.doc.width, self.doc.height, self.background)
         # The module grid is anchored to the sheet, so the overlay is too.
